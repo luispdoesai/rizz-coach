@@ -6,3 +6,4 @@ rizz_coach.db
 .DS_Store
 
 .env
+.agents/
