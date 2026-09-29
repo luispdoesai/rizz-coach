@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  rizz-coach:
+    build: .
+    container_name: open_wingman
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - ./rizz_coach.db:/app/rizz_coach.db
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8000

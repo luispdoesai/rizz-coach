@@ -1,0 +1,7 @@
+.venv
+__pycache__
+*.pyc
+rizz_coach.db
+.pytest_cache
+.DS_Store
+

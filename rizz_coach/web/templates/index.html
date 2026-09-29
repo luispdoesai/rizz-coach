@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenWingman | Open-Source AI Dating Coach & Rizz Engine</title>
+    <meta name="description" content="Open-source AI dating coach, live text subtext decoder, profile auditor, and sparring gym. Stop paying thousands for dating coaches.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Navigation Header -->
+        <header class="navbar">
+            <div class="brand">
+                <div class="brand-icon">
+                    <span class="flame-emoji">🔥</span>
+                </div>
+                <div>
+                    <h1 class="brand-title">OpenWingman</h1>
+                    <p class="brand-tagline">Open-Source AI Dating Coach & Autonomous Rizz Engine</p>
+                </div>
+            </div>
+            <div class="header-badges">
+                <span class="badge badge-pulse">● 100% Private (BYOK)</span>
+                <span class="badge badge-outline">Zero $10/wk Subscriptions</span>
+                <span class="badge badge-gradient">MIT Licensed</span>
+            </div>
+        </header>
+
+        <!-- ROI & Stats Metric Bar -->
+        <section class="stats-bar" id="stats-bar">
+            <div class="stat-card">
+                <div class="stat-icon">💰</div>
+                <div class="stat-data">
+                    <span class="stat-value text-gradient-green" id="stat-saved">{{ stats.money_saved_vs_dating_coach }}</span>
+                    <span class="stat-label">Saved vs. Human Coaches</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🎯</div>
+                <div class="stat-data">
+                    <span class="stat-value text-gradient-purple" id="stat-conversion">{{ stats.conversion_rate_percent }}%</span>
+                    <span class="stat-label">Date & Number Conversion</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">⚡</div>
+                <div class="stat-data">
+                    <span class="stat-value text-gradient-pink" id="stat-rizz">{{ stats.average_rizz_score }}</span>
+                    <span class="stat-label">Average Rizz Score</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🛡️</div>
+                <div class="stat-data">
+                    <span class="stat-value text-gradient-cyan" id="stat-threads">{{ stats.total_conversations }}</span>
+                    <span class="stat-label">Active Protected Chats</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Workspace Tabs -->
+        <nav class="nav-tabs" role="tablist">
+            <button class="tab-btn active" id="tab-wingman-btn" onclick="switchTab('wingman')">
+                <span class="tab-emoji">🎯</span> Live Wingman
+            </button>
+            <button class="tab-btn" id="tab-gym-btn" onclick="switchTab('gym')">
+                <span class="tab-emoji">🥊</span> The Rizz Gym (Simulator)
+            </button>
+            <button class="tab-btn" id="tab-profile-btn" onclick="switchTab('profile')">
+                <span class="tab-emoji">📸</span> Profile & Bio Auditor
+            </button>
+            <button class="tab-btn" id="tab-autopsy-btn" onclick="switchTab('autopsy')">
+                <span class="tab-emoji">🩻</span> Chat Autopsy (Ghosting)
+            </button>
+            <button class="tab-btn" id="tab-automation-btn" onclick="switchTab('automation')">
+                <span class="tab-emoji">🤖</span> Automation & Webhooks
+            </button>
+        </nav>
+
+        <!-- TAB 1: Live Wingman & Subtext Decoder -->
+        <main class="tab-content active" id="tab-wingman">
+            <div class="grid-2col">
+                <!-- Input Panel -->
+                <div class="panel glass-card">
+                    <div class="panel-header">
+                        <h2>Decode Chat & Tactical Moves</h2>
+                        <button class="btn-text" id="btn-load-sample-chat" onclick="loadSampleChat()">Load Sample Chat</button>
+                    </div>
+                    <div class="form-group">
+                        <label for="match-name-input">Match Name</label>
+                        <input type="text" id="match-name-input" class="input-field" placeholder="e.g. Jessica, Sophie" value="Chloe">
+                    </div>
+                    <div class="form-group">
+                        <label for="chat-history-input">Paste Conversation (Latest at bottom)</label>
+                        <textarea id="chat-history-input" class="textarea-field" rows="9" placeholder="Her: hey, what are you up to this weekend?
+Me: just grabbing dinner with friends. you?
+Her: haha nice, probably just staying in unless something fun comes up"></textarea>
+                    </div>
+                    <button class="btn-primary" id="btn-run-analysis" onclick="runAnalysis()">
+                        <span>🔥 Decode Subtext & Generate Moves</span>
+                    </button>
+
+                    <!-- Quick Draft Scorer -->
+                    <div class="quick-scorer-box">
+                        <div class="panel-header-sm">
+                            <h3>Test Your Own Draft (Cringe Interceptor)</h3>
+                        </div>
+                        <div class="inline-input-group">
+                            <input type="text" id="draft-test-input" class="input-field" placeholder="Type what you want to send...">
+                            <button class="btn-secondary" id="btn-test-draft" onclick="testDraft()">Score It</button>
+                        </div>
+                        <div id="draft-score-result" class="draft-result hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Analysis Output Panel -->
+                <div class="panel glass-card" id="analysis-output-panel">
+                    <div class="panel-header">
+                        <h2>Coach Breakdown</h2>
+                        <span class="badge" id="report-interest-level">Ready</span>
+                    </div>
+
+                    <div id="wingman-empty-state" class="empty-state">
+                        <div class="empty-icon">💡</div>
+                        <h3>Paste a chat to decode the dynamic</h3>
+                        <p>Our coach will dissect what she actually meant, evaluate your frame control, intercept cringe mistakes, and provide 3 calculated responses.</p>
+                    </div>
+
+                    <div id="wingman-results" class="results-container hidden">
+                        <!-- Score & Subtext Banner -->
+                        <div class="score-banner">
+                            <div class="circular-score">
+                                <span class="score-num" id="report-interest-score">--</span>
+                                <span class="score-sub">Interest</span>
+                            </div>
+                            <div class="subtext-content">
+                                <div class="subtext-title">🧐 Subtext Translation</div>
+                                <div class="subtext-text" id="report-subtext">Loading...</div>
+                                <div class="meta-row">
+                                    <span class="meta-chip" id="report-frame">Frame: Balanced</span>
+                                    <span class="meta-chip" id="report-investment">Investment: Normal</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Cringe Warnings -->
+                        <div class="warnings-box" id="report-warnings-box">
+                            <div class="warnings-title">⚠️ Coach Caution Flags</div>
+                            <ul class="warnings-list" id="report-warnings-list"></ul>
+                        </div>
+
+                        <!-- 3 Tactical Moves -->
+                        <h3 class="section-title">🎯 3 Tactical Response Moves</h3>
+                        <div class="moves-list" id="report-moves-list">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- TAB 2: The Rizz Gym (Interactive Simulator) -->
+        <section class="tab-content" id="tab-gym">
+            <div class="grid-gym">
+                <!-- Archetype Selector Sidebar -->
+                <div class="panel glass-card archetype-sidebar">
+                    <div class="panel-header">
+                        <h2>Select Sparring Partner</h2>
+                    </div>
+                    <div class="archetype-cards" id="archetype-cards-list">
+                        <div class="archetype-card active" onclick="selectArchetype('chloe')">
+                            <div class="char-header">
+                                <span class="char-avatar">👑</span>
+                                <div>
+                                    <div class="char-name">Chloe</div>
+                                    <div class="char-tag">The Banter Queen</div>
+                                </div>
+                            </div>
+                            <p class="char-desc">Sharp, playful, loves teasing. Roasts generic pickup lines on sight.</p>
+                        </div>
+                        <div class="archetype-card" onclick="selectArchetype('elena')">
+                            <div class="char-header">
+                                <span class="char-avatar">💼</span>
+                                <div>
+                                    <div class="char-name">Elena</div>
+                                    <div class="char-tag">The Skeptical High-Flyer</div>
+                                </div>
+                            </div>
+                            <p class="char-desc">Corporate consultant. Tests whether you fold or qualify yourself when challenged.</p>
+                        </div>
+                        <div class="archetype-card" onclick="selectArchetype('mia')">
+                            <div class="char-header">
+                                <span class="char-avatar">🧊</span>
+                                <div>
+                                    <div class="char-name">Mia</div>
+                                    <div class="char-tag">The Dry Replier</div>
+                                </div>
+                            </div>
+                            <p class="char-desc">Sends 3-word replies ("haha cool"). Forces you to create hooks without writing essays.</p>
+                        </div>
+                        <div class="archetype-card" onclick="selectArchetype('sofia')">
+                            <div class="char-header">
+                                <span class="char-avatar">🎨</span>
+                                <div>
+                                    <div class="char-name">Sofia</div>
+                                    <div class="char-tag">The Adventurous Creative</div>
+                                </div>
+                            </div>
+                            <p class="char-desc">Photographer. Loves spontaneous banter, deep late-night topics, and vibe checks.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Arena & Sideline Coach -->
+                <div class="panel glass-card gym-arena">
+                    <div class="panel-header">
+                        <div class="arena-title">
+                            <h2 id="active-char-name">Chloe (The Banter Queen)</h2>
+                            <span class="badge badge-pulse">Sparring Live</span>
+                        </div>
+                        <button class="btn-text" onclick="resetGym()">Reset Match</button>
+                    </div>
+
+                    <!-- Chat Messages Log -->
+                    <div class="chat-viewport" id="gym-chat-log">
+                        <div class="chat-msg msg-incoming">
+                            <div class="msg-sender" id="gym-opener-sender">Chloe</div>
+                            <div class="msg-bubble" id="gym-opener-bubble">Your profile looks like a curated advertisement for a good boy. Are you actually fun or just well-behaved?</div>
+                        </div>
+                    </div>
+
+                    <!-- Coach Sideline Tip Box -->
+                    <div class="sideline-box" id="gym-sideline-box">
+                        <div class="sideline-header">
+                            <span class="sideline-icon">🥊</span>
+                            <span class="sideline-title">Coach Sideline Tip</span>
+                            <span class="sideline-score" id="gym-turn-score">Last Move: 85/100</span>
+                        </div>
+                        <p class="sideline-text" id="gym-sideline-text">She opened with a playful qualification frame test. Do NOT defend yourself or list your accomplishments. Tease back or lean into being a menace.</p>
+                    </div>
+
+                    <!-- Chat Input -->
+                    <div class="chat-input-bar">
+                        <input type="text" id="gym-user-input" class="input-field" placeholder="Type your sparring response..." onkeydown="if(event.key==='Enter') sendGymMessage()">
+                        <button class="btn-primary btn-send" id="btn-gym-send" onclick="sendGymMessage()">Send Move</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 3: Profile & Bio Auditor -->
+        <section class="tab-content" id="tab-profile">
+            <div class="grid-2col">
+                <div class="panel glass-card">
+                    <div class="panel-header">
+                        <h2>Profile & Bio Auditor</h2>
+                        <button class="btn-text" onclick="loadSampleBio()">Load Sample Bio</button>
+                    </div>
+                    <div class="form-group">
+                        <label for="profile-bio-input">Your Current Bio</label>
+                        <textarea id="profile-bio-input" class="textarea-field" rows="4" placeholder="e.g. 6'0. Love dogs, traveling, gym, and good food. Fluent in sarcasm. Looking for a partner in crime."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="profile-prompts-input">Dating App Prompts (Hinge / Bumble Q&A)</label>
+                        <textarea id="profile-prompts-input" class="textarea-field" rows="3" placeholder="e.g. Prompt: 'I'll know it's time to delete this app when...' -> Answer: 'I find someone who loves tacos'"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="profile-photos-input">Photo Descriptions / Order</label>
+                        <textarea id="profile-photos-input" class="textarea-field" rows="3" placeholder="Photo 1: Mirror selfie at gym
+Photo 2: Me in sunglasses on a boat
+Photo 3: Big group photo with 6 guys at a bar"></textarea>
+                    </div>
+                    <button class="btn-primary" id="btn-audit-profile" onclick="auditProfile()">
+                        <span>🔍 Audit Profile & Generate 3 High-Value Bios</span>
+                    </button>
+                </div>
+
+                <div class="panel glass-card" id="profile-results-panel">
+                    <div class="panel-header">
+                        <h2>Audit Scorecard & Fixes</h2>
+                        <span class="badge" id="profile-score-badge">Ready</span>
+                    </div>
+
+                    <div id="profile-empty-state" class="empty-state">
+                        <div class="empty-icon">📸</div>
+                        <h3>Get a full $500 dating profile audit for free</h3>
+                        <p>Dating coaches charge hundreds to tell you the obvious: stop using gym selfies and clichés. Get instant photo scoring and high-converting bio rewrites.</p>
+                    </div>
+
+                    <div id="profile-results" class="results-container hidden">
+                        <!-- Score Header -->
+                        <div class="profile-score-header">
+                            <div class="score-circle-big" id="profile-overall-score">72</div>
+                            <div>
+                                <h3 class="profile-critique-title">Profile Intrigue Rating</h3>
+                                <p class="profile-critique-text" id="profile-bio-critique">Loading critique...</p>
+                            </div>
+                        </div>
+
+                        <!-- Photo Audit Breakdown -->
+                        <h4 class="section-title">📸 Photo Breakdown</h4>
+                        <div class="photo-critique-list" id="profile-photo-list"></div>
+
+                        <!-- Cliches Flagged -->
+                        <div class="warnings-box">
+                            <div class="warnings-title">🚫 Clichés Detected</div>
+                            <ul class="warnings-list" id="profile-cliches-list"></ul>
+                        </div>
+
+                        <!-- Improved Bio Variations -->
+                        <h4 class="section-title">✨ High-Converting Bio Rewrites</h4>
+                        <div class="bio-variations" id="profile-bios-list"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 4: Chat Autopsy (Ghosting Diagnostic) -->
+        <section class="tab-content" id="tab-autopsy">
+            <div class="grid-2col">
+                <div class="panel glass-card">
+                    <div class="panel-header">
+                        <h2>Chat Autopsy (Why Did She Ghost?)</h2>
+                        <button class="btn-text" onclick="loadSampleDeadChat()">Load Dead Chat</button>
+                    </div>
+                    <div class="form-group">
+                        <label for="autopsy-history-input">Paste the Full Stalled / Ghosted Conversation</label>
+                        <textarea id="autopsy-history-input" class="textarea-field" rows="12" placeholder="Me: Hey Chloe, how was your weekend?
+Her: Pretty good, just relaxing.
+Me: That's nice! Did you do anything fun or just chill at home?
+Her: Just watched Netflix.
+Me: Oh cool what show did you watch? I love TV shows too.
+[Ghosted - No reply for 4 days]"></textarea>
+                    </div>
+                    <button class="btn-primary" id="btn-run-autopsy" onclick="runAutopsy()">
+                        <span>🩻 Run Post-Mortem & Get Revival Texts</span>
+                    </button>
+                </div>
+
+                <div class="panel glass-card">
+                    <div class="panel-header">
+                        <h2>Diagnostic Report</h2>
+                        <span class="badge" id="autopsy-status-badge">Awaiting Input</span>
+                    </div>
+
+                    <div id="autopsy-empty-state" class="empty-state">
+                        <div class="empty-icon">🩻</div>
+                        <h3>Diagnose the point of failure</h3>
+                        <p>Most chats die because of a loss of tension, excessive questioning, or waiting too long to move to real-life drinks. Find out exactly where it died and get a Hail Mary revival text.</p>
+                    </div>
+
+                    <div id="autopsy-results" class="results-container hidden">
+                        <div class="fatal-turn-card">
+                            <div class="fatal-title">⚠️ The Fatal Turn (Momentum Death)</div>
+                            <div class="fatal-text" id="autopsy-fatal-turn">--</div>
+                        </div>
+
+                        <div class="autopsy-cause-card">
+                            <div class="cause-title">🔬 Root Cause</div>
+                            <div class="cause-text" id="autopsy-root-cause">--</div>
+                            <div class="recovery-chance">
+                                <span>Revival Probability: </span>
+                                <strong id="autopsy-recovery-prob" class="text-gradient-purple">65%</strong>
+                            </div>
+                        </div>
+
+                        <h4 class="section-title">🔥 Hail Mary Revival Moves</h4>
+                        <div class="revival-list" id="autopsy-revival-list"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 5: Automation & Webhooks -->
+        <section class="tab-content" id="tab-automation">
+            <div class="grid-2col">
+                <div class="panel glass-card">
+                    <div class="panel-header">
+                        <h2>Automated Ingestion Simulator</h2>
+                        <span class="badge badge-pulse">Mode: {{ automation_mode|title }}</span>
+                    </div>
+                    <p class="panel-desc">Test how the automated message engine parses incoming texts, scores them, calculates human pacing jitter, and filters for conversion (phone numbers & dates).</p>
+
+                    <div class="form-group">
+                        <label for="auto-incoming-input">Incoming Text from Match</label>
+                        <input type="text" id="auto-incoming-input" class="input-field" value="Yeah I had a great time! My number is 310-555-0199 text me there">
+                    </div>
+                    <div class="btn-group-row">
+                        <button class="btn-secondary" onclick="setAutoTest('number')">Test Number Won</button>
+                        <button class="btn-secondary" onclick="setAutoTest('date')">Test Date Agreed</button>
+                        <button class="btn-secondary" onclick="setAutoTest('ongoing')">Test Normal Banter</button>
+                        <button class="btn-secondary" onclick="setAutoTest('rejection')">Test Rejection</button>
+                    </div>
+                    <button class="btn-primary" id="btn-run-auto-test" onclick="runAutomationTest()">
+                        <span>🤖 Process Through Automation Pipeline</span>
+                    </button>
+
+                    <div id="auto-decision-box" class="decision-box hidden">
+                        <div class="decision-header">
+                            <span class="decision-action" id="auto-action-label">HANDOFF_TO_USER</span>
+                            <span class="decision-status" id="auto-status-label">CONVERTED_NUMBER</span>
+                        </div>
+                        <div class="decision-reason" id="auto-reason-text">Goal achieved! Contact info or date agreement secured.</div>
+                        <div class="decision-delay" id="auto-delay-text">Scheduled Pacing Delay: 0s (Instant notification to user)</div>
+                    </div>
+                </div>
+
+                <div class="panel glass-card">
+                    <div class="panel-header">
+                        <h2>How to Wire Up Live Automation</h2>
+                    </div>
+                    <div class="setup-guide">
+                        <div class="setup-step">
+                            <div class="step-num">1</div>
+                            <div class="step-content">
+                                <h4>Virtual SMS via Twilio</h4>
+                                <p>Set Twilio SMS webhook URL to: <code>http://your-server:8000/webhooks/twilio</code>. Inbound texts are automatically routed and handled with anti-detection pacing.</p>
+                            </div>
+                        </div>
+
+                        <div class="setup-step">
+                            <div class="step-num">2</div>
+                            <div class="step-content">
+                                <h4>Telegram Pocket Wingman</h4>
+                                <p>Forward messages or upload screenshots to your personal Telegram bot. The bot replies in 2 seconds with the subtext breakdown and 3 tactical moves.</p>
+                            </div>
+                        </div>
+
+                        <div class="setup-step">
+                            <div class="step-num">3</div>
+                            <div class="step-content">
+                                <h4>Generic Webhook (iOS Shortcuts / Zapier)</h4>
+                                <p>Send a POST request with <code>{"message": "her text"}</code> to <code>/webhooks/generic</code> to trigger instant coaching suggestions on your iPhone lock screen.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
