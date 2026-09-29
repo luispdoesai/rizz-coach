@@ -18,39 +18,11 @@ class ProfileAuditReport(BaseModel):
     cliches_detected: List[str]
     improved_bios: List[ImprovedBio]
 
-PROFILE_SYSTEM_PROMPT = """
-You are an elite dating profile consultant and photographer critic.
-Evaluate dating profile inputs (bio, prompts, and photo notes).
+from rizz_coach.prompts import load_prompt
 
-Score the profile out of 100 based on:
-- High Status & Intrigue (does it trigger curiosity or look like a job resume?)
-- Polarization (is it memorable or boringly agreeable?)
-- Photo quality & vibe balance (headshots, social proof, fitness, lifestyle)
+def get_profile_system_prompt() -> str:
+    return load_prompt("profile.md")
 
-Detect classic cliches:
-- Gym selfie / bathroom mirror pic
-- Sunglasses hiding eye contact
-- Confusing group photos
-- "Fluent in sarcasm" / "Looking for my partner in crime" / "Love traveling and food"
-
-Generate 3 high-converting bio replacements:
-1. Witty & Polarizing (provokes playful debate)
-2. High-Value Minimalist (effortless, cool)
-3. Playful Storyteller (distinctive scenario hook)
-
-Return strict JSON matching this schema:
-{
-  "overall_score": <0-100>,
-  "photo_audit": [
-    {"photo_num": 1, "score": <0-100>, "verdict": "<Honest critique>"}
-  ],
-  "bio_critique": "<Detailed breakdown of what is hurting the bio>",
-  "cliches_detected": ["<List of clichés found>"],
-  "improved_bios": [
-    {"style": "<Style Name>", "bio": "<Text>"}
-  ]
-}
-"""
 
 class ProfileAuditor:
     def __init__(self, client: Optional[LLMClient] = None):
@@ -62,7 +34,7 @@ Current Bio: "{bio}"
 Profile Prompts/Q&A: "{prompts_text}"
 Photo Descriptions/Notes: "{photo_descriptions}"
 """
-        data = await self.client.generate_json(PROFILE_SYSTEM_PROMPT, user_prompt)
+        data = await self.client.generate_json(get_profile_system_prompt(), user_prompt)
 
         improved_bios = [
             ImprovedBio(style=b.get("style", "Modern"), bio=b.get("bio", "Exploring the city and hunting down the best espresso."))

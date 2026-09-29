@@ -418,28 +418,55 @@ Me: Oh cool what show did you watch? I love TV shows too.
                         <div class="setup-step">
                             <div class="step-num">1</div>
                             <div class="step-content">
-                                <h4>Virtual SMS via Twilio</h4>
-                                <p>Set Twilio SMS webhook URL to: <code>http://your-server:8000/webhooks/twilio</code>. Inbound texts are automatically routed and handled with anti-detection pacing.</p>
+                                <h4>Tinder Web & Instagram Connectors</h4>
+                                <p>Set <code>TINDER_AUTH_TOKEN</code> or <code>INSTAGRAM_SESSION_ID</code> in <code>.env</code>. The engine automatically fetches matches, generates openers, and sends approval requests.</p>
                             </div>
                         </div>
 
                         <div class="setup-step">
                             <div class="step-num">2</div>
                             <div class="step-content">
-                                <h4>Telegram Pocket Wingman</h4>
-                                <p>Forward messages or upload screenshots to your personal Telegram bot. The bot replies in 2 seconds with the subtext breakdown and 3 tactical moves.</p>
+                                <h4>Telegram Pocket Wingman with Approval Buttons</h4>
+                                <p>Set <code>TELEGRAM_BOT_TOKEN</code> and <code>TELEGRAM_CHAT_ID</code>. Whenever a match is found, receive a card on your phone with <b>[✅ Approve & Schedule]</b>, <b>[⚡ Send Now]</b>, and <b>[❌ Skip]</b> buttons.</p>
                             </div>
                         </div>
 
                         <div class="setup-step">
                             <div class="step-num">3</div>
                             <div class="step-content">
-                                <h4>Generic Webhook (iOS Shortcuts / Zapier)</h4>
-                                <p>Send a POST request with <code>{"message": "her text"}</code> to <code>/webhooks/generic</code> to trigger instant coaching suggestions on your iPhone lock screen.</p>
+                                <h4>Virtual SMS via Twilio</h4>
+                                <p>Set Twilio SMS webhook to: <code>http://your-server:8000/webhooks/twilio</code> for automated conversational intake and anti-detection jitter pacing.</p>
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <!-- Outreach Approval Queue -->
+            <div class="panel glass-card" style="margin-top: 24px;">
+                <div class="panel-header">
+                    <div>
+                        <h2>🔥 Match Outreach & Approval Queue (Copilot Mode)</h2>
+                        <p class="panel-desc">Review and approve AI-generated openers before they are sent. Messages are queued with human anti-detection jitter delays.</p>
+                    </div>
+                    <div class="btn-group-row">
+                        <button class="btn-primary" onclick="syncOutreach('tinder')">
+                            <span>🔥 Sync Tinder Matches</span>
+                        </button>
+                        <button class="btn-secondary" onclick="syncOutreach('instagram')">
+                            <span>📸 Sync Instagram DMs</span>
+                        </button>
+                        <button class="btn-text" onclick="loadOutreachQueue()">Refresh Queue</button>
+                    </div>
+                </div>
+
+                <div id="outreach-empty-state" class="empty-state">
+                    <div class="empty-icon">📬</div>
+                    <h3>No pending outreach approvals</h3>
+                    <p>Click "Sync Tinder Matches" or "Sync Instagram DMs" above to scan for fresh matches and queue up personalized openers.</p>
+                </div>
+
+                <div id="outreach-queue-list" class="outreach-queue-container hidden"></div>
             </div>
         </section>
     </div>

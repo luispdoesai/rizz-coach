@@ -33,6 +33,10 @@ function switchTab(tabId) {
 
     if (activeBtn) activeBtn.classList.add('active');
     if (activeContent) activeContent.classList.add('active');
+
+    if (tabId === 'automation') {
+        loadOutreachQueue();
+    }
 }
 
 // Toast Helper
@@ -461,3 +465,149 @@ function escapeJs(text) {
     if (!text) return '';
     return text.replace(/'/g, "\\'").replace(/"/g, '\\"');
 }
+
+// =========================================================
+// Outreach & Approval Queue Controller
+// =========================================================
+
+async function loadOutreachQueue() {
+    const emptyState = document.getElementById('outreach-empty-state');
+    const queueList = document.getElementById('outreach-queue-list');
+    if (!queueList) return;
+
+    try {
+        const res = await fetch('/api/outreach/pending');
+        const items = await res.json();
+
+        if (!items || items.length === 0) {
+            emptyState.classList.remove('hidden');
+            queueList.classList.add('hidden');
+            queueList.innerHTML = '';
+            return;
+        }
+
+        emptyState.classList.add('hidden');
+        queueList.classList.remove('hidden');
+        queueList.innerHTML = '';
+
+        items.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'outreach-item-card';
+            card.id = `outreach-card-${item.id}`;
+
+            const mins = Math.floor(item.scheduled_delay_seconds / 60);
+            const secs = item.scheduled_delay_seconds % 60;
+            const delayStr = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+
+            card.innerHTML = `
+                <div class="outreach-header">
+                    <span class="outreach-target">👤 ${escapeHtml(item.match_name)}</span>
+                    <span class="badge badge-gradient">${escapeHtml(item.platform.toUpperCase())}</span>
+                </div>
+                <div class="outreach-bio">${escapeHtml(item.match_bio || 'No bio provided')}</div>
+                <label style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px; display: block;">Proposed Opener (You can edit before approving):</label>
+                <textarea class="outreach-edit-textarea" id="outreach-text-${item.id}" rows="2">${escapeHtml(item.proposed_text)}</textarea>
+                <div class="outreach-meta-bar">
+                    <span class="outreach-delay-tag">⏱️ Scheduled Delay: ${delayStr} (Human Anti-Detection Jitter)</span>
+                    <div class="outreach-actions-row">
+                        <button class="btn-approve" onclick="approveOutreach('${item.id}', false)">✅ Approve & Schedule</button>
+                        <button class="btn-send-now" onclick="approveOutreach('${item.id}', true)">⚡ Send Now</button>
+                        <button class="btn-reject" onclick="rejectOutreach('${item.id}')">❌ Skip</button>
+                    </div>
+                </div>
+            `;
+            queueList.appendChild(card);
+        });
+    } catch (err) {
+        console.error("Error loading outreach queue:", err);
+    }
+}
+
+async function syncOutreach(platform) {
+    showToast(`Scanning for new ${platform.toUpperCase()} matches...`);
+    try {
+        const res = await fetch('/api/outreach/sync', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ platform: platform })
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+            showToast(`Found & queued ${data.queued_count} matches for approval!`);
+            await loadOutreachQueue();
+        } else if (data.status === 'rate_limited') {
+            showToast(`Safety limit reached: ${data.message}`);
+        } else {
+            showToast("Sync finished.");
+        }
+    } catch (err) {
+        showToast("Error syncing matches.");
+    }
+}
+
+async function approveOutreach(itemId, instant) {
+    const textArea = document.getElementById(`outreach-text-${itemId}`);
+    const editedText = textArea ? textArea.value.trim() : null;
+
+    try {
+        const res = await fetch('/api/outreach/approve', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                item_id: itemId,
+                instant: instant,
+                edited_text: editedText
+            })
+        });
+        const result = await res.json();
+
+        if (result.status === 'sent') {
+            showToast("⚡ Dispatched text to match immediately!");
+        } else {
+            showToast(`✅ Approved! Scheduled with human delay (${result.scheduled_delay}s).`);
+        }
+
+        // Animate card removal from queue
+        const card = document.getElementById(`outreach-card-${itemId}`);
+        if (card) {
+            card.style.opacity = '0';
+            card.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                card.remove();
+                const remaining = document.querySelectorAll('.outreach-item-card');
+                if (remaining.length === 0) {
+                    loadOutreachQueue();
+                }
+            }, 250);
+        }
+    } catch (err) {
+        showToast("Error approving outreach.");
+    }
+}
+
+async function rejectOutreach(itemId) {
+    try {
+        await fetch('/api/outreach/reject', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ item_id: itemId })
+        });
+        showToast("Match outreach skipped.");
+
+        const card = document.getElementById(`outreach-card-${itemId}`);
+        if (card) {
+            card.style.opacity = '0';
+            card.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                card.remove();
+                const remaining = document.querySelectorAll('.outreach-item-card');
+                if (remaining.length === 0) {
+                    loadOutreachQueue();
+                }
+            }, 250);
+        }
+    } catch (err) {
+        showToast("Error rejecting outreach.");
+    }
+}
+

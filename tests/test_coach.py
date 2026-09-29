@@ -82,3 +82,17 @@ async def test_profile_auditor():
     assert report.overall_score > 0
     assert len(report.improved_bios) >= 1
     assert len(report.photo_audit) >= 1
+
+def test_markdown_prompts_loaded():
+    from rizz_coach.prompts import load_prompt
+    analyzer_p = load_prompt("analyzer.md")
+    assert "Mark Manson" in analyzer_p
+    assert "Logan Ury" in analyzer_p
+    assert "Matthew Hussey" in analyzer_p
+
+    scorer_p = load_prompt("scorer.md")
+    assert "interview_mode" in scorer_p
+
+    profile_p = load_prompt("profile.md")
+    assert "Blaine Anderson" in profile_p
+

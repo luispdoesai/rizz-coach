@@ -5,3 +5,4 @@ rizz_coach.db
 .pytest_cache
 .DS_Store
 
+.env

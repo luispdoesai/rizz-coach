@@ -15,33 +15,11 @@ class AutopsyReport(BaseModel):
     lessons_learned: List[str]
     revival_texts: List[RevivalText]
 
-AUTOPSY_SYSTEM_PROMPT = """
-You are a master dating strategist performing a forensic autopsy on a stalled, ghosted, or dead conversation.
+from rizz_coach.prompts import load_prompt
 
-Analyze:
-1. THE FATAL TURN: Pinpoint the exact message where momentum died, frame was lost, or she withdrew.
-2. ROOT CAUSE: Why did she ghost? (e.g. over-texting, boring interview questions, took too long to ask for date, killed conversational tension).
-3. RECOVERY PROBABILITY: Realistic percentage chance of reviving the conversation.
-4. REVIVAL TEXTS: Provide 2 high-conversion revival options:
-   - "The Playful Callout": Flips the frame, makes light of her silence without being bitter.
-   - "The Curiosity Loop": Drops an intriguing statement that compels her to ask 'what?'.
+def get_autopsy_system_prompt() -> str:
+    return load_prompt("autopsy.md")
 
-Return strict JSON:
-{
-  "status": "<GHOSTED | STALLED | COLD>",
-  "fatal_turn": "<Quote and number of the turn where it died>",
-  "root_cause": "<1-2 sentence core reason>",
-  "recovery_probability": "<e.g. 60%>",
-  "lessons_learned": ["<Actionable rule 1>", "<Actionable rule 2>"],
-  "revival_texts": [
-    {
-      "name": "<e.g. Playful Frame Flip>",
-      "text": "<The text to send>",
-      "why_it_works": "<Psychological rationale>"
-    }
-  ]
-}
-"""
 
 class ChatAutopsy:
     def __init__(self, client: Optional[LLMClient] = None):
@@ -54,7 +32,7 @@ Perform a post-mortem on this stalled conversation:
 {full_chat_history}
 ----------------------------------------
 """
-        data = await self.client.generate_json(AUTOPSY_SYSTEM_PROMPT, user_prompt)
+        data = await self.client.generate_json(get_autopsy_system_prompt(), user_prompt)
         
         revivals = [
             RevivalText(

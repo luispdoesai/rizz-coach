@@ -12,33 +12,11 @@ class RizzScorecard(BaseModel):
     why_it_scored: str
     suggested_rewrite: Optional[str] = None
 
-SCORER_SYSTEM_PROMPT = """
-You are a ruthless, expert text game critic and dating coach.
-Evaluate the user's drafted message in response to the chat context.
+from rizz_coach.prompts import load_prompt
 
-Score on:
-1. WIT & HUMOR: Is it memorable or generic?
-2. FRAME & VALUE: Does he come off confident or needy/seeking approval?
-3. CALIBRATION: Does message length and tone match her investment level?
-4. ESCALATION: Does it move the interaction forward naturally?
+def get_scorer_system_prompt() -> str:
+    return load_prompt("scorer.md")
 
-Flag specific Cringe anti-patterns:
-- "interview_mode": Generic question like 'how was your weekend', 'what do you do for work'
-- "pedestalizing": Excessive compliments on looks before rapport is built
-- "essay_trap": Sending 3+ sentences when she sent 4 words
-- "apologetic_needy": Apologizing for taking time to text or asking 'did I do something wrong?'
-
-Return strict JSON:
-{
-  "score": <0 to 100>,
-  "letter_grade": "<A+ | A | B | C | D | F>",
-  "is_cringe": <true if score < 65 or major anti-pattern>,
-  "cringe_flags": ["<specific flags found>"],
-  "pacing_rating": "<Ideal | Too eager | Too slow>",
-  "why_it_scored": "<1-2 sentence honest critique>",
-  "suggested_rewrite": "<Rewritten message with +20 Rizz, sounding relaxed and playful>"
-}
-"""
 
 class RizzScorer:
     def __init__(self, client: Optional[LLMClient] = None):
@@ -63,7 +41,7 @@ Context / Her Last Message: "{context_message}"
 User Drafted Message: "{draft_message}"
 Pre-detected heuristic flags: {quick_flags}
 """
-        data = await self.client.generate_json(SCORER_SYSTEM_PROMPT, user_prompt)
+        data = await self.client.generate_json(get_scorer_system_prompt(), user_prompt)
 
         flags = list(set(quick_flags + data.get("cringe_flags", [])))
         score = data.get("score", 75)

@@ -16,46 +16,11 @@ class AnalysisReport(BaseModel):
     investment_ratio: str        # e.g., "User: 34 words | Match: 12 words"
     cringe_warnings: List[str]   # Flags needy or over-invested behavior
     tactical_moves: List[TacticalMove]
+from rizz_coach.prompts import load_prompt
 
-ANALYZER_SYSTEM_PROMPT = """
-You are an elite, modern dating coach and master conversationalist.
-Your role is to act as a wingman: decode the hidden subtext of a conversation, calculate interest level, identify frame control, and recommend 3 tactical next moves.
+def get_analyzer_system_prompt() -> str:
+    return load_prompt("analyzer.md")
 
-You must respond in strict JSON matching this schema:
-{
-  "interest_score": <int between 0 and 100>,
-  "interest_level": "<string e.g. High / Flirty, Medium / Banter, Dry / Stalled, Low / Skeptical>",
-  "subtext_translation": "<concise explanation of what her message actually means emotionally and dynamically>",
-  "frame_holder": "<You lead | She leads | Neutral / Contested>",
-  "investment_ratio": "<Comparison of effort, word length, and questions>",
-  "cringe_warnings": ["<List of behaviors the user must avoid, e.g., double texting, over-apologizing>"],
-  "tactical_moves": [
-    {
-      "category": "Banter / Push-Pull",
-      "text": "<playful, tension-building response>",
-      "rizz_score": <int 80-99>,
-      "rationale": "<psychological reason why this works>"
-    },
-    {
-      "category": "Direct Escalation",
-      "text": "<smooth invitation for drink/date or phone number>",
-      "rizz_score": <int 80-99>,
-      "rationale": "<why this smoothly escalates>"
-    },
-    {
-      "category": "Low-Investment Reset",
-      "text": "<relaxed, unbothered reply if her text is dry>",
-      "rizz_score": <int 70-85>,
-      "rationale": "<why this matches pace without losing frame>"
-    }
-  ]
-}
-
-Guidelines:
-- Never generate creepy or pushy PUA lines.
-- Favor clever banter, playful teasing, and authentic confidence.
-- Lowercase / casual texting style that sounds 100% human.
-"""
 
 class ConversationAnalyzer:
     def __init__(self, client: Optional[LLMClient] = None):
@@ -70,7 +35,7 @@ Conversation History (latest message at bottom):
 ----------------------------------------
 Analyze this conversation, decode the subtext, and produce the 3 best tactical responses.
 """
-        data = await self.client.generate_json(ANALYZER_SYSTEM_PROMPT, user_prompt)
+        data = await self.client.generate_json(get_analyzer_system_prompt(), user_prompt)
         
         # Ensure fallback defaults if parsing missed keys
         moves = [

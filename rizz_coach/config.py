@@ -18,8 +18,12 @@ class Settings(BaseSettings):
     automation_max_delay_seconds: int = Field(default=720, alias="AUTOMATION_MAX_DELAY_SECONDS")
     alert_on_conversion: bool = Field(default=True, alias="ALERT_ON_CONVERSION")
 
-    # Integrations
+    # Integrations & Connectors
     telegram_bot_token: Optional[str] = Field(default=None, alias="TELEGRAM_BOT_TOKEN")
+    telegram_chat_id: Optional[str] = Field(default=None, alias="TELEGRAM_CHAT_ID")
+    tinder_auth_token: Optional[str] = Field(default=None, alias="TINDER_AUTH_TOKEN")
+    instagram_session_id: Optional[str] = Field(default=None, alias="INSTAGRAM_SESSION_ID")
+    max_daily_outreach: int = Field(default=15, alias="MAX_DAILY_OUTREACH")
     twilio_account_sid: Optional[str] = Field(default=None, alias="TWILIO_ACCOUNT_SID")
     twilio_auth_token: Optional[str] = Field(default=None, alias="TWILIO_AUTH_TOKEN")
     twilio_phone_number: Optional[str] = Field(default=None, alias="TWILIO_PHONE_NUMBER")

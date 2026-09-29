@@ -42,6 +42,21 @@ class Database:
                 FOREIGN KEY (thread_id) REFERENCES threads(id)
             )
             """)
+
+            cursor.execute("""
+            CREATE TABLE IF NOT EXISTS outreach_queue (
+                id TEXT PRIMARY KEY,
+                platform TEXT NOT NULL,
+                match_id TEXT NOT NULL,
+                match_name TEXT NOT NULL,
+                match_bio TEXT,
+                proposed_text TEXT NOT NULL,
+                scheduled_delay_seconds INTEGER DEFAULT 0,
+                status TEXT DEFAULT 'PENDING_APPROVAL',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+            """)
             conn.commit()
 
     def upsert_thread(self, thread_id: str, platform: str, target_name: str = "Match", status: str = "ACTIVE", contact: Optional[str] = None):
@@ -99,5 +114,83 @@ class Database:
                 "average_rizz_score": avg_score,
                 "money_saved_vs_dating_coach": f"${max(total_threads * 120, 1680)}"
             }
+
+    def create_outreach_item(self, item_id: str, platform: str, match_id: str, match_name: str, match_bio: str, proposed_text: str, delay_seconds: int = 180) -> Dict[str, Any]:
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+            INSERT OR REPLACE INTO outreach_queue (id, platform, match_id, match_name, match_bio, proposed_text, scheduled_delay_seconds, status, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, 'PENDING_APPROVAL', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+            """, (item_id, platform, match_id, match_name, match_bio, proposed_text, delay_seconds))
+            conn.commit()
+            return {
+                "id": item_id,
+                "platform": platform,
+                "match_id": match_id,
+                "match_name": match_name,
+                "match_bio": match_bio,
+                "proposed_text": proposed_text,
+                "scheduled_delay_seconds": delay_seconds,
+                "status": "PENDING_APPROVAL"
+            }
+
+    def get_pending_outreach(self, limit: int = 20) -> List[Dict[str, Any]]:
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+            SELECT id, platform, match_id, match_name, match_bio, proposed_text, scheduled_delay_seconds, status, created_at
+            FROM outreach_queue
+            WHERE status = 'PENDING_APPROVAL'
+            ORDER BY created_at DESC
+            LIMIT ?
+            """, (limit,))
+            return [dict(row) for row in cursor.fetchall()]
+
+    def get_outreach_item(self, item_id: str) -> Optional[Dict[str, Any]]:
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+            SELECT id, platform, match_id, match_name, match_bio, proposed_text, scheduled_delay_seconds, status, created_at
+            FROM outreach_queue
+            WHERE id = ?
+            """, (item_id,))
+            row = cursor.fetchone()
+            return dict(row) if row else None
+
+    def update_outreach_status(self, item_id: str, status: str, edited_text: Optional[str] = None) -> bool:
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            if edited_text:
+                cursor.execute("""
+                UPDATE outreach_queue
+                SET status = ?, proposed_text = ?, updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+                """, (status, edited_text, item_id))
+            else:
+                cursor.execute("""
+                UPDATE outreach_queue
+                SET status = ?, updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+                """, (status, item_id))
+            conn.commit()
+            return cursor.rowcount > 0
+
+    def get_daily_outreach_count(self, platform: Optional[str] = None) -> int:
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            if platform:
+                cursor.execute("""
+                SELECT COUNT(*) FROM outreach_queue
+                WHERE status IN ('APPROVED', 'SENT')
+                  AND platform = ?
+                  AND date(created_at) = date('now')
+                """, (platform,))
+            else:
+                cursor.execute("""
+                SELECT COUNT(*) FROM outreach_queue
+                WHERE status IN ('APPROVED', 'SENT')
+                  AND date(created_at) = date('now')
+                """)
+            return cursor.fetchone()[0]
 
 db = Database()
