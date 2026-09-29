@@ -19,7 +19,7 @@ from rizz_coach.adapters.telegram_bot import telegram_bot
 from rizz_coach.connectors import outreach_manager, tinder_connector, instagram_connector
 
 app = FastAPI(
-    title="OpenWingman / RizzCoach",
+    title="RizzCoach",
     description="Open-Source AI Dating Coach, Text Game Analyzer, Profile Auditor, and Sparring Gym",
     version="0.1.0"
 )

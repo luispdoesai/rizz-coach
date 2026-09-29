@@ -1,5 +1,5 @@
 """
-OpenWingman / RizzCoach
+RizzCoach
 Open-source autonomous dating assistant, live text coach, profile auditor, and simulator.
 """
 

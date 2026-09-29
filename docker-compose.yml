@@ -3,7 +3,7 @@ version: '3.8'
 services:
   rizz-coach:
     build: .
-    container_name: open_wingman
+    container_name: rizz_coach
     restart: unless-stopped
     ports:
       - "8000:8000"

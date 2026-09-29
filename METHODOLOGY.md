@@ -1,10 +1,10 @@
 # 📚 Coaching Methodologies & Behavioral Science Frameworks
 
-OpenWingman is built on empirically verified behavioral science, relationship research, and established modern dating coaching frameworks. Rather than relying on outdated "pickup artist" (PUA) gimmicks or generic platitudes, every engine in OpenWingman enforces proven principles from world-renowned dating experts.
+RizzCoach is built on empirically verified behavioral science, relationship research, and established modern dating coaching frameworks. Rather than relying on outdated "pickup artist" (PUA) gimmicks or generic platitudes, every engine in RizzCoach enforces proven principles from world-renowned dating experts.
 
 ---
 
-## 🏛️ The 5 Pillars of OpenWingman
+## 🏛️ The 5 Pillars of RizzCoach
 
 ### 1. Mark Manson (*Models: Attract Women Through Honesty*)
 * **Non-Neediness & Demeanor**: High attractiveness is driven by non-neediness—communicating desire without seeking validation or approval. The person who invests less anxiety holds the frame.
@@ -16,7 +16,7 @@ OpenWingman is built on empirically verified behavioral science, relationship re
 
 ### 2. Logan Ury (*How to Not Die Alone*, Director of Relationship Science at Hinge)
 * **Anti-Interview Mode**: Banning resume-like small talk ("How was your day?", "What do you do for work?", "Where are you from?"). Replacing them with experiential hooks and situational banter.
-* **The Momentum Rule**: Conversations on dating apps decay rapidly after 4–8 exchanges. OpenWingman prioritizes transitioning from text to in-person dates within the first week.
+* **The Momentum Rule**: Conversations on dating apps decay rapidly after 4–8 exchanges. RizzCoach prioritizes transitioning from text to in-person dates within the first week.
 * **Prompt Specificity**: Profile prompts that are generic ("I love traveling, tacos, and dogs") fail. Prompts must be concrete and offer an effortless conversational runway.
 * *Engine Integration*: [`scorer.py`](file:///Users/luispadilla/Desktop/rizz-coach/rizz_coach/core/scorer.py), [`profile.py`](file:///Users/luispadilla/Desktop/rizz-coach/rizz_coach/core/profile.py), [`autopsy.py`](file:///Users/luispadilla/Desktop/rizz-coach/rizz_coach/core/autopsy.py)
 

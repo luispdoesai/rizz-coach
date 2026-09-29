@@ -1,5 +1,5 @@
 // =========================================================
-// OpenWingman / RizzCoach - Client Interactive Controller
+// RizzCoach - Client Interactive Controller
 // =========================================================
 
 let currentArchetype = "chloe";
