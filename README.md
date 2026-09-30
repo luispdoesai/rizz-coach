@@ -81,26 +81,33 @@ Connect your Tinder or Instagram account to find matches awaiting an opener:
 > [!NOTE]
 > **No API keys or credit cards needed!** RizzCoach comes out-of-the-box with a smart offline mock engine, so you can test every single feature immediately without spending a dime.
 
-### Step 1: Open Terminal and Run
-```bash
-# 1. Clone the repository
-git clone https://github.com/your-username/rizz-coach.git
-cd rizz-coach
+### ⚡ 1-Command Launch (Recommended)
+Simply clone and run `start.sh` — it automatically creates the virtual environment, installs dependencies, initializes your `.env`, and launches the engine:
 
-# 2. Set up the Python environment
+```bash
+git clone https://github.com/luispdoesai/rizz-coach.git
+cd rizz-coach
+./start.sh
+```
+
+Once running, open **`http://localhost:8000`** in your browser, or hit the endpoints directly from your phone!
+
+<details>
+<summary><b>🛠️ Manual Setup (Click to expand if you prefer manual steps)</b></summary>
+
+```bash
+# 1. Set up Python environment
 python3 -m venv .venv
 source .venv/bin/activate
 
-# 3. Install requirements
+# 2. Install requirements
 pip install -r requirements.txt
 
-# 4. Copy the environment file and launch
+# 3. Copy environment and launch
 cp .env.example .env
 python -m rizz_coach.server
 ```
-
-### Step 2: Open in Your Browser
-Go to **`http://localhost:8000`** in Chrome, Safari, or Brave. You'll see the full dark-mode dashboard ready to roll!
+</details>
 
 ---
 
@@ -131,8 +138,6 @@ RizzCoach doesn't use sleazy pickup artist tricks. Every engine strictly enforce
 * **Blaine Anderson (*Dating by Blaine*)**: Strict photo hierarchy (smiling with teeth, direct eye contact, candid lifestyle) and zero gym mirror selfies.
 
 👉 *Read the full scientific breakdown in [**METHODOLOGY.md**](METHODOLOGY.md).*
-
----
 
 ---
 
@@ -224,7 +229,7 @@ Run the automated test suite with one command:
 ```bash
 .venv/bin/pytest tests/
 ```
-All 13 unit and integration tests will run in under a second!
+All 16 unit and integration tests will run in under a second!
 
 ---
 
