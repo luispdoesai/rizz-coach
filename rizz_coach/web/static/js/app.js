@@ -1,5 +1,6 @@
 // =========================================================
-// RizzCoach - Client Interactive Controller
+// RizzCoach - Client Interactive Controller & Ergonomics Engine
+// Architecture: Studio UX, Keyboard Accelerators, Tactile Feedback
 // =========================================================
 
 let currentArchetype = "chloe";
@@ -23,78 +24,121 @@ const SAMPLE_BIOS = {
     photos: "Photo 1: Gym mirror selfie\nPhoto 2: Sunglasses on a yacht\nPhoto 3: Big group shot where everyone is wearing hats"
 };
 
-// Tab Switching
+// ----------------------------------------------------
+// Navigation & Tab Switching
+// ----------------------------------------------------
 function switchTab(tabId) {
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+        btn.setAttribute('aria-selected', 'false');
+    });
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+    });
 
     const activeBtn = document.getElementById(`tab-${tabId}-btn`);
     const activeContent = document.getElementById(`tab-${tabId}`);
 
-    if (activeBtn) activeBtn.classList.add('active');
-    if (activeContent) activeContent.classList.add('active');
+    if (activeBtn) {
+        activeBtn.classList.add('active');
+        activeBtn.setAttribute('aria-selected', 'true');
+    }
+    if (activeContent) {
+        activeContent.classList.add('active');
+    }
 
     if (tabId === 'automation') {
         loadOutreachQueue();
     }
 }
 
-// Toast Helper
-function showToast(message) {
+// ----------------------------------------------------
+// Tactile Toast Notifications
+// ----------------------------------------------------
+function showToast(message, type = 'info') {
     const container = document.getElementById('toast-container');
+    if (!container) return;
+
     const toast = document.createElement('div');
     toast.className = 'toast';
-    toast.innerHTML = `<span>🔥</span> <span>${message}</span>`;
+
+    let iconSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`;
+    if (type === 'success') {
+        iconSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent-emerald)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`;
+    } else if (type === 'warn') {
+        iconSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent-amber)" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
+    }
+
+    toast.innerHTML = `<span>${iconSvg}</span><span>${escapeHtml(message)}</span>`;
     container.appendChild(toast);
 
     setTimeout(() => {
         toast.style.opacity = '0';
-        toast.style.transform = 'translateY(10px)';
-        setTimeout(() => toast.remove(), 200);
+        toast.style.transform = 'translateY(8px)';
+        toast.style.transition = 'all 160ms ease';
+        setTimeout(() => toast.remove(), 180);
     }, 2800);
 }
 
-// Copy Text
-function copyToClipboard(text) {
+// ----------------------------------------------------
+// Tactile Clipboard Copy
+// ----------------------------------------------------
+function copyToClipboard(text, btnElement) {
     navigator.clipboard.writeText(text).then(() => {
-        showToast("Copied tactical move to clipboard!");
+        if (btnElement) {
+            const originalHtml = btnElement.innerHTML;
+            btnElement.classList.add('copied');
+            btnElement.innerHTML = `
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>Copied!</span>
+            `;
+            setTimeout(() => {
+                btnElement.classList.remove('copied');
+                btnElement.innerHTML = originalHtml;
+            }, 1800);
+        }
+        showToast("Copied to clipboard!", "success");
     }).catch(() => {
-        showToast("Copied!");
+        showToast("Copied!", "success");
     });
 }
 
-// Load Samples
+// ----------------------------------------------------
+// Sample Preset Loaders
+// ----------------------------------------------------
 function loadSampleChat() {
     document.getElementById('chat-history-input').value = SAMPLE_CHATS.chloe;
     document.getElementById('match-name-input').value = "Chloe";
-    showToast("Sample conversation loaded!");
+    showToast("Loaded sample banter conversation", "info");
 }
 
 function loadSampleDeadChat() {
     document.getElementById('autopsy-history-input').value = SAMPLE_CHATS.dead_chat;
-    showToast("Dead chat sample loaded!");
+    showToast("Loaded dead chat sample", "info");
 }
 
 function loadSampleBio() {
     document.getElementById('profile-bio-input').value = SAMPLE_BIOS.bio;
     document.getElementById('profile-prompts-input').value = SAMPLE_BIOS.prompts;
     document.getElementById('profile-photos-input').value = SAMPLE_BIOS.photos;
-    showToast("Sample bio & photos loaded!");
+    showToast("Loaded sample bio & photo cues", "info");
 }
 
+// ----------------------------------------------------
 // TAB 1: Live Wingman Analysis
+// ----------------------------------------------------
 async function runAnalysis() {
     const chatHistory = document.getElementById('chat-history-input').value.trim();
     const targetName = document.getElementById('match-name-input').value.trim() || "Match";
     const btn = document.getElementById('btn-run-analysis');
 
     if (!chatHistory) {
-        showToast("Please paste a conversation first.");
+        showToast("Paste a conversation first.", "warn");
         return;
     }
 
     btn.disabled = true;
-    btn.innerHTML = "<span>Analyzing Dynamics...</span>";
+    btn.innerHTML = `<span>Decoding Dynamics...</span>`;
 
     try {
         const res = await fetch('/api/analyze', {
@@ -109,53 +153,61 @@ async function runAnalysis() {
         const results = document.getElementById('wingman-results');
         results.classList.remove('hidden');
 
-        document.getElementById('report-interest-score').textContent = data.interest_score;
+        document.getElementById('report-interest-score').textContent = `${data.interest_score}/100`;
         document.getElementById('report-interest-level').textContent = data.interest_level;
         document.getElementById('report-subtext').textContent = data.subtext_translation;
-        document.getElementById('report-frame').textContent = `Frame: ${data.frame_holder}`;
-        document.getElementById('report-investment').textContent = `Investment: ${data.investment_ratio}`;
+        document.getElementById('report-frame').textContent = data.frame_holder;
+        document.getElementById('report-investment').textContent = data.investment_ratio;
 
-        // Warnings
+        // Warnings List
         const warningsList = document.getElementById('report-warnings-list');
+        const warningsBox = document.getElementById('report-warnings-box');
         warningsList.innerHTML = '';
-        (data.cringe_warnings || []).forEach(w => {
-            const li = document.createElement('li');
-            li.textContent = w;
-            warningsList.appendChild(li);
-        });
+        if (data.cringe_warnings && data.cringe_warnings.length > 0) {
+            warningsBox.classList.remove('hidden');
+            data.cringe_warnings.forEach(w => {
+                const li = document.createElement('li');
+                li.textContent = w;
+                warningsList.appendChild(li);
+            });
+        } else {
+            warningsBox.classList.add('hidden');
+        }
 
-        // Tactical Moves
+        // Tactical Moves Deck
         const movesList = document.getElementById('report-moves-list');
         movesList.innerHTML = '';
 
         data.tactical_moves.forEach(move => {
-            let catClass = 'cat-banter';
-            if (move.category.includes('Escalation')) catClass = 'cat-escalate';
-            if (move.category.includes('Reset')) catClass = 'cat-reset';
-
             const card = document.createElement('div');
             card.className = 'move-card';
             card.innerHTML = `
                 <div class="move-header">
-                    <span class="move-category ${catClass}">${move.category}</span>
-                    <span class="move-rizz-score">Rizz: ${move.rizz_score}/100</span>
+                    <span class="move-category">${escapeHtml(move.category)}</span>
+                    <span class="move-score">Rizz ${move.rizz_score}/100</span>
                 </div>
-                <div class="move-text-box">
-                    <div class="move-text">${escapeHtml(move.text)}</div>
-                    <button class="btn-copy" onclick="copyToClipboard('${escapeJs(move.text)}')">Copy</button>
+                <div class="move-text-row">
+                    <span class="move-text">"${escapeHtml(move.text)}"</span>
+                    <button class="btn-copy" onclick="copyToClipboard('${escapeJs(move.text)}', this)">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                        <span>Copy</span>
+                    </button>
                 </div>
-                <div class="move-rationale">💡 ${escapeHtml(move.rationale)}</div>
+                <div class="move-rationale">Tactical Rationale: ${escapeHtml(move.rationale)}</div>
             `;
             movesList.appendChild(card);
         });
 
-        showToast("Conversation decoded!");
+        showToast("Conversation decoded successfully!", "success");
     } catch (err) {
-        showToast("Error analyzing conversation.");
+        showToast("Error analyzing conversation.", "warn");
         console.error(err);
     } finally {
         btn.disabled = false;
-        btn.innerHTML = "<span>🔥 Decode Subtext & Generate Moves</span>";
+        btn.innerHTML = `
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            <span>Decode Subtext & Generate Moves</span>
+        `;
     }
 }
 
@@ -164,14 +216,16 @@ async function testDraft() {
     const draft = document.getElementById('draft-test-input').value.trim();
     const context = document.getElementById('chat-history-input').value.trim();
     const resultBox = document.getElementById('draft-score-result');
+    const btn = document.getElementById('btn-test-draft');
 
     if (!draft) {
-        showToast("Type a draft message first.");
+        showToast("Type a draft message first.", "warn");
         return;
     }
 
     resultBox.classList.remove('hidden');
-    resultBox.innerHTML = "Evaluating draft...";
+    resultBox.innerHTML = "<span style='color: var(--text-muted);'>Evaluating draft tension...</span>";
+    btn.disabled = true;
 
     try {
         const res = await fetch('/api/score', {
@@ -181,34 +235,48 @@ async function testDraft() {
         });
         const score = await res.json();
 
-        let badgeColor = score.score >= 80 ? '#34d399' : (score.score >= 65 ? '#fbbf24' : '#f87171');
-        let flagsHtml = (score.cringe_flags || []).map(f => `<span style="color:#f87171;">⚠️ ${f}</span>`).join('<br>');
+        let badgeColor = score.score >= 80 ? 'var(--accent-emerald-text)' : (score.score >= 65 ? 'var(--accent-amber-text)' : 'var(--accent-rose-text)');
+        let flagsHtml = (score.cringe_flags || []).map(f => `<div style="color: var(--accent-rose-text); font-size: 11.5px; margin-top: 3px;">• ${escapeHtml(f)}</div>`).join('');
 
         resultBox.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                <strong>Rizz Score: <span style="color:${badgeColor}; font-size:16px;">${score.score}/100 (${score.letter_grade})</span></strong>
-                <span style="font-size:11px; color:#94a3b8;">Pacing: ${score.pacing_rating}</span>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-family: var(--font-mono); font-weight:700; font-size:15px; color:${badgeColor};">${score.score}/100</span>
+                    <span style="font-size: 11px; font-weight:600; padding: 2px 6px; border-radius: var(--radius-xs); background: var(--bg-surface); border: 1px solid var(--border-subtle); color: var(--text-secondary);">${score.letter_grade}</span>
+                </div>
+                <span style="font-size:11px; font-family: var(--font-mono); color:var(--text-muted);">Pacing: ${escapeHtml(score.pacing_rating)}</span>
             </div>
-            <p style="margin-bottom:6px; color:#cbd5e1;">${escapeHtml(score.why_it_scored)}</p>
+            <p style="margin-bottom:6px; color:var(--text-primary); font-size:12.5px; line-height:1.45;">${escapeHtml(score.why_it_scored)}</p>
             ${flagsHtml ? `<div style="margin-bottom:8px;">${flagsHtml}</div>` : ''}
             ${score.suggested_rewrite ? `
-                <div style="background:rgba(139,92,246,0.15); border:1px solid rgba(139,92,246,0.3); border-radius:6px; padding:8px 10px; margin-top:8px;">
-                    <div style="font-size:11px; font-weight:700; color:#c4b5fd;">Coach Rewrite (+20 Rizz):</div>
-                    <div style="font-size:13px; color:#fff; margin-top:2px;">"${escapeHtml(score.suggested_rewrite)}"</div>
+                <div style="background:var(--bg-surface); border:1px solid var(--border-default); border-radius:var(--radius-sm); padding:10px 12px; margin-top:8px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                        <span style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:var(--accent-primary);">Calibrated Rewrite (+20 Rizz)</span>
+                        <button class="btn-copy" onclick="copyToClipboard('${escapeJs(score.suggested_rewrite)}', this)">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                            <span>Copy</span>
+                        </button>
+                    </div>
+                    <div style="font-size:13px; color:var(--text-primary);">"${escapeHtml(score.suggested_rewrite)}"</div>
                 </div>
             ` : ''}
         `;
     } catch (err) {
-        resultBox.innerHTML = "Error evaluating draft.";
+        resultBox.innerHTML = "<span style='color: var(--accent-rose-text);'>Error evaluating draft.</span>";
+    } finally {
+        btn.disabled = false;
     }
 }
 
+// ----------------------------------------------------
 // TAB 2: The Rizz Gym Simulator
+// ----------------------------------------------------
 function selectArchetype(archetypeId) {
     currentArchetype = archetypeId;
-    document.querySelectorAll('.archetype-card').forEach(c => c.classList.remove('active'));
-    event.currentTarget.classList.add('active');
-
+    document.querySelectorAll('.archetype-chip').forEach(c => c.classList.remove('active'));
+    if (window.event && window.event.currentTarget) {
+        window.event.currentTarget.classList.add('active');
+    }
     resetGym();
 }
 
@@ -230,20 +298,42 @@ function resetGym() {
     appendGymMessage(starter.name, starter.opener, 'incoming');
     gymHistory.push({ role: starter.name, content: starter.opener });
 
-    document.getElementById('gym-sideline-text').textContent = "Sparring started! Read her opener, match her tone, and don't qualify yourself.";
-    document.getElementById('gym-turn-score').textContent = "Ready";
+    document.getElementById('gym-sideline-text').textContent = "Sparring match started. Match her frame, avoid qualifying yourself, and keep banter high.";
+    document.getElementById('gym-turn-score').textContent = "Awaiting Round";
 }
 
 function appendGymMessage(sender, text, type) {
     const chatLog = document.getElementById('gym-chat-log');
-    const msg = document.createElement('div');
-    msg.className = `chat-msg msg-${type}`;
-    msg.innerHTML = `
-        <div class="msg-sender">${sender}</div>
-        <div class="msg-bubble">${escapeHtml(text)}</div>
+    const wrap = document.createElement('div');
+    wrap.className = `chat-bubble-wrap ${type}`;
+    wrap.innerHTML = `
+        <div class="bubble-sender">${escapeHtml(sender)}</div>
+        <div class="chat-bubble">${escapeHtml(text)}</div>
     `;
-    chatLog.appendChild(msg);
+    chatLog.appendChild(wrap);
     chatLog.scrollTop = chatLog.scrollHeight;
+}
+
+function showGymTypingIndicator(senderName) {
+    const chatLog = document.getElementById('gym-chat-log');
+    const wrap = document.createElement('div');
+    wrap.className = 'chat-bubble-wrap incoming';
+    wrap.id = 'gym-typing-bubble';
+    wrap.innerHTML = `
+        <div class="bubble-sender">${escapeHtml(senderName)}</div>
+        <div class="typing-indicator">
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+        </div>
+    `;
+    chatLog.appendChild(wrap);
+    chatLog.scrollTop = chatLog.scrollHeight;
+}
+
+function removeGymTypingIndicator() {
+    const bubble = document.getElementById('gym-typing-bubble');
+    if (bubble) bubble.remove();
 }
 
 async function sendGymMessage() {
@@ -258,17 +348,26 @@ async function sendGymMessage() {
     const btn = document.getElementById('btn-gym-send');
     btn.disabled = true;
 
+    // Show simulated typing indicator for natural conversational pacing
+    const currentName = document.getElementById('active-char-name').textContent.split(' ')[0] || "Match";
+    showGymTypingIndicator(currentName);
+
     try {
-        const res = await fetch('/api/gym/turn', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                archetype_id: currentArchetype,
-                user_message: text,
-                history: gymHistory
-            })
-        });
+        const [res] = await Promise.all([
+            fetch('/api/gym/turn', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    archetype_id: currentArchetype,
+                    user_message: text,
+                    history: gymHistory
+                })
+            }),
+            new Promise(r => setTimeout(r, 650)) // realistic typing pacing
+        ]);
+
         const data = await res.json();
+        removeGymTypingIndicator();
 
         // Append character reply
         appendGymMessage(data.character_name, data.character_reply, 'incoming');
@@ -278,17 +377,20 @@ async function sendGymMessage() {
         document.getElementById('gym-turn-score').textContent = `Move Score: ${data.coach_feedback.turn_rizz_score}/100`;
         document.getElementById('gym-sideline-text').innerHTML = `
             <strong>${escapeHtml(data.coach_feedback.what_worked)}</strong><br>
-            <span style="color:#c4b5fd;">Coach tip: ${escapeHtml(data.coach_feedback.coaching_tip)}</span>
+            <span style="color:var(--accent-sky-text); margin-top: 3px; display: block;">Coach Tip: ${escapeHtml(data.coach_feedback.coaching_tip)}</span>
         `;
     } catch (err) {
-        showToast("Error in sparring round.");
+        removeGymTypingIndicator();
+        showToast("Error in sparring round.", "warn");
     } finally {
         btn.disabled = false;
         input.focus();
     }
 }
 
-// TAB 3: Profile Auditor
+// ----------------------------------------------------
+// TAB 3: Profile Lab & Bio Auditor
+// ----------------------------------------------------
 async function auditProfile() {
     const bio = document.getElementById('profile-bio-input').value.trim();
     const prompts = document.getElementById('profile-prompts-input').value.trim();
@@ -296,12 +398,12 @@ async function auditProfile() {
     const btn = document.getElementById('btn-audit-profile');
 
     if (!bio) {
-        showToast("Please enter a bio to audit.");
+        showToast("Enter a bio to audit.", "warn");
         return;
     }
 
     btn.disabled = true;
-    btn.innerHTML = "<span>Auditing Profile...</span>";
+    btn.innerHTML = "<span>Auditing Profile Assets...</span>";
 
     try {
         const res = await fetch('/api/profile/audit', {
@@ -315,10 +417,10 @@ async function auditProfile() {
         document.getElementById('profile-results').classList.remove('hidden');
 
         document.getElementById('profile-overall-score').textContent = data.overall_score;
-        document.getElementById('profile-score-badge').textContent = `Score: ${data.overall_score}/100`;
+        document.getElementById('profile-score-badge').textContent = `Rating: ${data.overall_score}/100`;
         document.getElementById('profile-bio-critique').textContent = data.bio_critique;
 
-        // Photos
+        // Photos critique
         const photoList = document.getElementById('profile-photo-list');
         photoList.innerHTML = '';
         data.photo_audit.forEach(p => {
@@ -326,12 +428,12 @@ async function auditProfile() {
             item.className = 'photo-item';
             item.innerHTML = `
                 <div><strong>Photo ${p.photo_num}:</strong> ${escapeHtml(p.verdict)}</div>
-                <span class="badge" style="background:rgba(255,255,255,0.06);">${p.score}/100</span>
+                <span class="telemetry-chip">${p.score}/100</span>
             `;
             photoList.appendChild(item);
         });
 
-        // Cliches
+        // Clichés
         const clichesList = document.getElementById('profile-cliches-list');
         clichesList.innerHTML = '';
         data.cliches_detected.forEach(c => {
@@ -347,34 +449,44 @@ async function auditProfile() {
             const card = document.createElement('div');
             card.className = 'bio-card';
             card.innerHTML = `
-                <div class="bio-style-tag">${escapeHtml(b.style)}</div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                    <span class="bio-style-tag">${escapeHtml(b.style)}</span>
+                    <button class="btn-copy" onclick="copyToClipboard('${escapeJs(b.bio)}', this)">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                        <span>Copy Bio</span>
+                    </button>
+                </div>
                 <div class="bio-text-content">"${escapeHtml(b.bio)}"</div>
-                <button class="btn-copy" onclick="copyToClipboard('${escapeJs(b.bio)}')">Copy Bio</button>
             `;
             biosList.appendChild(card);
         });
 
-        showToast("Profile audit complete!");
+        showToast("Profile audit completed!", "success");
     } catch (err) {
-        showToast("Error auditing profile.");
+        showToast("Error auditing profile.", "warn");
     } finally {
         btn.disabled = false;
-        btn.innerHTML = "<span>🔍 Audit Profile & Generate 3 High-Value Bios</span>";
+        btn.innerHTML = `
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <span>Audit Profile & Generate High-Value Bios</span>
+        `;
     }
 }
 
+// ----------------------------------------------------
 // TAB 4: Chat Autopsy
+// ----------------------------------------------------
 async function runAutopsy() {
     const history = document.getElementById('autopsy-history-input').value.trim();
     const btn = document.getElementById('btn-run-autopsy');
 
     if (!history) {
-        showToast("Please paste the dead conversation.");
+        showToast("Paste the stalled conversation first.", "warn");
         return;
     }
 
     btn.disabled = true;
-    btn.innerHTML = "<span>Analyzing Point of Failure...</span>";
+    btn.innerHTML = "<span>Analyzing Fatal Point...</span>";
 
     try {
         const res = await fetch('/api/autopsy', {
@@ -399,25 +511,33 @@ async function runAutopsy() {
             card.className = 'revival-card';
             card.innerHTML = `
                 <div class="revival-name">${escapeHtml(r.name)}</div>
-                <div class="move-text-box">
-                    <div class="move-text">"${escapeHtml(r.text)}"</div>
-                    <button class="btn-copy" onclick="copyToClipboard('${escapeJs(r.text)}')">Copy</button>
+                <div class="move-text-row">
+                    <span class="move-text">"${escapeHtml(r.text)}"</span>
+                    <button class="btn-copy" onclick="copyToClipboard('${escapeJs(r.text)}', this)">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                        <span>Copy</span>
+                    </button>
                 </div>
-                <div class="move-rationale">💡 ${escapeHtml(r.why_it_works)}</div>
+                <div class="move-rationale">Strategic Rationale: ${escapeHtml(r.why_it_works)}</div>
             `;
             revivalsList.appendChild(card);
         });
 
-        showToast("Autopsy complete!");
+        showToast("Autopsy report ready!", "success");
     } catch (err) {
-        showToast("Error running autopsy.");
+        showToast("Error running autopsy.", "warn");
     } finally {
         btn.disabled = false;
-        btn.innerHTML = "<span>🩻 Run Post-Mortem & Get Revival Texts</span>";
+        btn.innerHTML = `
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+            <span>Run Post-Mortem & Generate Revival Moves</span>
+        `;
     }
 }
 
+// ----------------------------------------------------
 // TAB 5: Automation Simulator
+// ----------------------------------------------------
 function setAutoTest(type) {
     const input = document.getElementById('auto-incoming-input');
     if (type === 'number') {
@@ -449,27 +569,15 @@ async function runAutomationTest() {
         document.getElementById('auto-reason-text').textContent = decision.reason;
         document.getElementById('auto-delay-text').textContent = `Calculated Anti-Detection Delay: ${decision.scheduled_delay_seconds}s`;
 
-        showToast(`Automation event: ${decision.action}`);
+        showToast(`Intake Pipeline: ${decision.action}`, "info");
     } catch (err) {
-        showToast("Error processing automation.");
+        showToast("Error processing automation.", "warn");
     }
 }
 
-// Helpers
-function escapeHtml(text) {
-    if (!text) return '';
-    return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-}
-
-function escapeJs(text) {
-    if (!text) return '';
-    return text.replace(/'/g, "\\'").replace(/"/g, '\\"');
-}
-
-// =========================================================
+// ----------------------------------------------------
 // Outreach & Approval Queue Controller
-// =========================================================
-
+// ----------------------------------------------------
 async function loadOutreachQueue() {
     const emptyState = document.getElementById('outreach-empty-state');
     const queueList = document.getElementById('outreach-queue-list');
@@ -501,18 +609,18 @@ async function loadOutreachQueue() {
 
             card.innerHTML = `
                 <div class="outreach-header">
-                    <span class="outreach-target">👤 ${escapeHtml(item.match_name)}</span>
-                    <span class="badge badge-gradient">${escapeHtml(item.platform.toUpperCase())}</span>
+                    <span class="outreach-name">Match: ${escapeHtml(item.match_name)}</span>
+                    <span class="outreach-platform-badge">${escapeHtml(item.platform.toUpperCase())}</span>
                 </div>
-                <div class="outreach-bio">${escapeHtml(item.match_bio || 'No bio provided')}</div>
-                <label style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px; display: block;">Proposed Opener (You can edit before approving):</label>
+                <div class="outreach-bio">Profile Cue: ${escapeHtml(item.match_bio || 'No bio provided')}</div>
+                <label style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px; display: block;">Proposed Opener (Edit before approving):</label>
                 <textarea class="outreach-edit-textarea" id="outreach-text-${item.id}" rows="2">${escapeHtml(item.proposed_text)}</textarea>
                 <div class="outreach-meta-bar">
-                    <span class="outreach-delay-tag">⏱️ Scheduled Delay: ${delayStr} (Human Anti-Detection Jitter)</span>
-                    <div class="outreach-actions-row">
-                        <button class="btn-approve" onclick="approveOutreach('${item.id}', false)">✅ Approve & Schedule</button>
-                        <button class="btn-send-now" onclick="approveOutreach('${item.id}', true)">⚡ Send Now</button>
-                        <button class="btn-reject" onclick="rejectOutreach('${item.id}')">❌ Skip</button>
+                    <span class="outreach-delay-tag">Anti-Detection Pacing Delay: ${delayStr}</span>
+                    <div class="btn-group-row">
+                        <button class="btn-approve" onclick="approveOutreach('${item.id}', false)">Approve & Schedule</button>
+                        <button class="btn-send-now" onclick="approveOutreach('${item.id}', true)">Send Now</button>
+                        <button class="btn-reject" onclick="rejectOutreach('${item.id}')">Skip</button>
                     </div>
                 </div>
             `;
@@ -524,7 +632,7 @@ async function loadOutreachQueue() {
 }
 
 async function syncOutreach(platform) {
-    showToast(`Scanning for new ${platform.toUpperCase()} matches...`);
+    showToast(`Scanning for new ${platform.toUpperCase()} matches...`, "info");
     try {
         const res = await fetch('/api/outreach/sync', {
             method: 'POST',
@@ -533,15 +641,15 @@ async function syncOutreach(platform) {
         });
         const data = await res.json();
         if (data.status === 'success') {
-            showToast(`Found & queued ${data.queued_count} matches for approval!`);
+            showToast(`Found & queued ${data.queued_count} matches for approval!`, "success");
             await loadOutreachQueue();
         } else if (data.status === 'rate_limited') {
-            showToast(`Safety limit reached: ${data.message}`);
+            showToast(`Safety limit reached: ${data.message}`, "warn");
         } else {
-            showToast("Sync finished.");
+            showToast("Sync finished.", "info");
         }
     } catch (err) {
-        showToast("Error syncing matches.");
+        showToast("Error syncing matches.", "warn");
     }
 }
 
@@ -562,26 +670,26 @@ async function approveOutreach(itemId, instant) {
         const result = await res.json();
 
         if (result.status === 'sent') {
-            showToast("⚡ Dispatched text to match immediately!");
+            showToast("Dispatched text immediately!", "success");
         } else {
-            showToast(`✅ Approved! Scheduled with human delay (${result.scheduled_delay}s).`);
+            showToast(`Approved! Scheduled with ${result.scheduled_delay}s delay.`, "success");
         }
 
-        // Animate card removal from queue
         const card = document.getElementById(`outreach-card-${itemId}`);
         if (card) {
             card.style.opacity = '0';
-            card.style.transform = 'scale(0.95)';
+            card.style.transform = 'scale(0.97)';
+            card.style.transition = 'all 200ms ease';
             setTimeout(() => {
                 card.remove();
                 const remaining = document.querySelectorAll('.outreach-item-card');
                 if (remaining.length === 0) {
                     loadOutreachQueue();
                 }
-            }, 250);
+            }, 200);
         }
     } catch (err) {
-        showToast("Error approving outreach.");
+        showToast("Error approving outreach.", "warn");
     }
 }
 
@@ -592,22 +700,69 @@ async function rejectOutreach(itemId) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ item_id: itemId })
         });
-        showToast("Match outreach skipped.");
+        showToast("Match outreach skipped.", "info");
 
         const card = document.getElementById(`outreach-card-${itemId}`);
         if (card) {
             card.style.opacity = '0';
-            card.style.transform = 'scale(0.95)';
+            card.style.transform = 'scale(0.97)';
+            card.style.transition = 'all 200ms ease';
             setTimeout(() => {
                 card.remove();
                 const remaining = document.querySelectorAll('.outreach-item-card');
                 if (remaining.length === 0) {
                     loadOutreachQueue();
                 }
-            }, 250);
+            }, 200);
         }
     } catch (err) {
-        showToast("Error rejecting outreach.");
+        showToast("Error rejecting outreach.", "warn");
     }
 }
 
+// ----------------------------------------------------
+// Global Keyboard Shortcuts
+// ----------------------------------------------------
+document.addEventListener('keydown', (e) => {
+    const isModifier = e.metaKey || e.ctrlKey;
+    const activeEl = document.activeElement;
+    const isInputActive = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA');
+
+    // Cmd+Enter / Ctrl+Enter shortcuts for rapid submission
+    if (isModifier && e.key === 'Enter') {
+        e.preventDefault();
+        if (activeEl && activeEl.id === 'draft-test-input') {
+            testDraft();
+        } else if (activeEl && (activeEl.id === 'profile-bio-input' || activeEl.id === 'profile-prompts-input' || activeEl.id === 'profile-photos-input')) {
+            auditProfile();
+        } else if (activeEl && activeEl.id === 'autopsy-history-input') {
+            runAutopsy();
+        } else if (activeEl && activeEl.id === 'gym-user-input') {
+            sendGymMessage();
+        } else {
+            // Default action: decode wingman
+            runAnalysis();
+        }
+        return;
+    }
+
+    // Number keys 1-5 for switching tabs when NOT in text input
+    if (!isInputActive && !isModifier) {
+        if (e.key === '1') switchTab('wingman');
+        else if (e.key === '2') switchTab('gym');
+        else if (e.key === '3') switchTab('profile');
+        else if (e.key === '4') switchTab('autopsy');
+        else if (e.key === '5') switchTab('automation');
+    }
+});
+
+// Helpers
+function escapeHtml(text) {
+    if (!text) return '';
+    return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function escapeJs(text) {
+    if (!text) return '';
+    return String(text).replace(/'/g, "\\'").replace(/"/g, '\\"');
+}

@@ -7,6 +7,16 @@ from rizz_coach.connectors.instagram import InstagramConnector, instagram_connec
 from rizz_coach.connectors.manager import OutreachManager, outreach_manager
 from rizz_coach.adapters.telegram_bot import telegram_bot
 
+@pytest.fixture(autouse=True)
+def clean_outreach_db():
+    with db._get_connection() as conn:
+        conn.execute("DELETE FROM outreach_queue")
+        conn.commit()
+    yield
+    with db._get_connection() as conn:
+        conn.execute("DELETE FROM outreach_queue")
+        conn.commit()
+
 @pytest.mark.asyncio
 async def test_tinder_connector_fetch_and_send():
     connector = TinderConnector()
