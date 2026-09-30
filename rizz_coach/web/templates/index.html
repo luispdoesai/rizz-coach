@@ -3,560 +3,554 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RizzCoach | Open-Source AI Dating Coach & Rizz Engine</title>
-    <meta name="description" content="High-density open-source AI dating coach, live conversational subtext decoder, profile auditor, and interactive sparring gym.">
+    <title>RizzCoach — Personal Dating Intelligence & Subtext Decoder</title>
+    <meta name="description" content="Modern AI workspace for conversational subtext decoding, sparring simulation, and profile optimization.">
     <!-- Google Fonts: Inter & JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
-    <div class="app-container">
-        <!-- App Header & Telemetry Bar -->
-        <header class="navbar" role="banner">
-            <div class="brand">
-                <div class="brand-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>
-                    </svg>
-                </div>
-                <div>
-                    <h1 class="brand-title">
-                        RizzCoach
-                        <span class="brand-badge">STUDIO v1.2</span>
-                    </h1>
-                    <p class="brand-tagline">Open-Source Autonomous Rizz Engine & Subtext Decoder</p>
-                </div>
-            </div>
-            <div class="header-telemetry" role="status" aria-label="System Status">
-                <div class="telemetry-chip">
-                    <span class="status-dot" aria-hidden="true"></span>
-                    <span>LOCAL LLM / BYOK</span>
-                </div>
-                <div class="telemetry-chip">
-                    <span>ZERO SUBSCRIPTIONS</span>
-                </div>
-                <div class="telemetry-chip">
-                    <span>MIT OPEN SOURCE</span>
-                </div>
-            </div>
-        </header>
-
-        <!-- Executive Metrics Strip -->
-        <section class="stats-strip" id="stats-bar" aria-label="Executive Performance Metrics">
-            <div class="stat-item">
-                <div class="stat-header-row">
-                    <span class="stat-label">Saved vs Human Coaches</span>
-                    <span class="stat-icon-wrap" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                    </span>
-                </div>
-                <span class="stat-value" id="stat-saved">{{ stats.money_saved_vs_dating_coach }}</span>
-                <span class="stat-desc">Zero $3k bootcamps required</span>
-            </div>
-            <div class="stat-item">
-                <div class="stat-header-row">
-                    <span class="stat-label">Date Conversion Rate</span>
-                    <span class="stat-icon-wrap" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
-                    </span>
-                </div>
-                <span class="stat-value" id="stat-conversion">{{ stats.conversion_rate_percent }}%</span>
-                <span class="stat-desc">Phone numbers & IRL meetups</span>
-            </div>
-            <div class="stat-item">
-                <div class="stat-header-row">
-                    <span class="stat-label">Average Rizz Score</span>
-                    <span class="stat-icon-wrap" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                    </span>
-                </div>
-                <span class="stat-value" id="stat-rizz">{{ stats.average_rizz_score }}</span>
-                <span class="stat-desc">Calibrated across 15k+ turns</span>
-            </div>
-            <div class="stat-item">
-                <div class="stat-header-row">
-                    <span class="stat-label">Protected Active Chats</span>
-                    <span class="stat-icon-wrap" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                    </span>
-                </div>
-                <span class="stat-value" id="stat-threads">{{ stats.total_conversations }}</span>
-                <span class="stat-desc">Private & saved on local disk</span>
-            </div>
-        </section>
-
-        <!-- Segmented Navigation Tabs -->
-        <nav class="nav-segmented" role="tablist" aria-label="Tool Navigation">
-            <button class="tab-btn active" id="tab-wingman-btn" role="tab" aria-selected="true" aria-controls="tab-wingman" onclick="switchTab('wingman')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                <span>Live Wingman</span>
-                <kbd>1</kbd>
-            </button>
-            <button class="tab-btn" id="tab-gym-btn" role="tab" aria-selected="false" aria-controls="tab-gym" onclick="switchTab('gym')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                <span>The Rizz Gym</span>
-                <kbd>2</kbd>
-            </button>
-            <button class="tab-btn" id="tab-profile-btn" role="tab" aria-selected="false" aria-controls="tab-profile" onclick="switchTab('profile')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                <span>Profile Lab</span>
-                <kbd>3</kbd>
-            </button>
-            <button class="tab-btn" id="tab-autopsy-btn" role="tab" aria-selected="false" aria-controls="tab-autopsy" onclick="switchTab('autopsy')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-                <span>Chat Autopsy</span>
-                <kbd>4</kbd>
-            </button>
-            <button class="tab-btn" id="tab-automation-btn" role="tab" aria-selected="false" aria-controls="tab-automation" onclick="switchTab('automation')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-                <span>Dispatch & Automation</span>
-                <kbd>5</kbd>
-            </button>
-        </nav>
-
-        <!-- TAB 1: Live Wingman & Subtext Decoder -->
-        <main class="tab-content active" id="tab-wingman" role="tabpanel" aria-labelledby="tab-wingman-btn">
-            <div class="grid-workspace">
-                <!-- Input Panel -->
-                <div class="panel">
-                    <div class="panel-header">
-                        <h2 class="panel-title">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                            Decode Chat & Tactical Moves
-                        </h2>
-                        <button class="btn-text" id="btn-load-sample-chat" onclick="loadSampleChat()">Load Sample</button>
+    <div class="app-shell">
+        <!-- Modern Collapsible Sidebar (Notion / Tana / OpenAI style) -->
+        <aside class="app-sidebar" role="navigation" aria-label="Main Navigation">
+            <div>
+                <!-- Workspace Switcher -->
+                <div class="sidebar-header">
+                    <div class="workspace-switcher" title="Switch Workspace">
+                        <div class="workspace-meta">
+                            <div class="workspace-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>
+                                </svg>
+                            </div>
+                            <div class="workspace-title-box">
+                                <span class="workspace-name">RizzCoach</span>
+                                <span class="workspace-badge">STUDIO · BYOK</span>
+                            </div>
+                        </div>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
                     </div>
-                    <p class="panel-desc">Paste ongoing iMessage, Hinge, or Tinder conversation. RizzCoach decodes psychological subtext, evaluates frame dominance, and computes 3 calibrated next moves.</p>
+                </div>
 
-                    <div class="form-group">
-                        <label class="form-label" for="match-name-input">Match Identifier / Name</label>
-                        <input type="text" id="match-name-input" class="input-field" placeholder="e.g. Jessica, Sophie" value="Chloe">
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="chat-history-input">Chat Stream (Latest message at bottom)</label>
-                        <textarea id="chat-history-input" class="textarea-field" rows="8" placeholder="Her: hey, what are you up to this weekend?
-Me: just grabbing dinner with friends. you?
-Her: haha nice, probably just staying in unless something fun comes up"></textarea>
-                    </div>
-
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                        <button class="btn-primary" id="btn-run-analysis" onclick="runAnalysis()">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                            <span>Decode Subtext & Generate Moves</span>
+                <!-- Navigation Sections -->
+                <div class="sidebar-nav-scroll">
+                    <div class="nav-section-title">Workspaces</div>
+                    <nav class="nav-group" role="tablist">
+                        <button class="nav-item active" id="tab-wingman-btn" role="tab" aria-selected="true" onclick="switchTab('wingman')">
+                            <div class="nav-item-left">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                                <span>Live Wingman</span>
+                            </div>
+                            <kbd>1</kbd>
                         </button>
-                        <span style="font-size: 11px; color: var(--text-muted);"><kbd>Cmd+Enter</kbd> to run</span>
-                    </div>
+                        <button class="nav-item" id="tab-gym-btn" role="tab" aria-selected="false" onclick="switchTab('gym')">
+                            <div class="nav-item-left">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                                <span>The Rizz Gym</span>
+                            </div>
+                            <kbd>2</kbd>
+                        </button>
+                        <button class="nav-item" id="tab-profile-btn" role="tab" aria-selected="false" onclick="switchTab('profile')">
+                            <div class="nav-item-left">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                <span>Profile Lab</span>
+                            </div>
+                            <kbd>3</kbd>
+                        </button>
+                        <button class="nav-item" id="tab-autopsy-btn" role="tab" aria-selected="false" onclick="switchTab('autopsy')">
+                            <div class="nav-item-left">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                                <span>Chat Autopsy</span>
+                            </div>
+                            <kbd>4</kbd>
+                        </button>
+                        <button class="nav-item" id="tab-automation-btn" role="tab" aria-selected="false" onclick="switchTab('automation')">
+                            <div class="nav-item-left">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                                <span>Dispatch Queue</span>
+                            </div>
+                            <span class="nav-badge-pill" id="sidebar-queue-badge">Sync</span>
+                        </button>
+                    </nav>
 
-                    <!-- Quick Draft Scorer -->
-                    <div class="quick-scorer-box">
-                        <div class="panel-header-sm">
-                            <h3>Test Draft (Cringe Interceptor)</h3>
+                    <!-- Quick Session Presets -->
+                    <div class="nav-section-title" style="margin-top: 8px;">Recent Sessions</div>
+                    <div class="nav-group">
+                        <div class="recent-match-item" onclick="loadSampleChat(); switchTab('wingman');">
+                            <span class="recent-dot active"></span>
+                            <span>Chloe (Banter Match)</span>
                         </div>
-                        <div class="inline-input-group">
-                            <input type="text" id="draft-test-input" class="input-field" placeholder="Type what you're thinking of sending...">
-                            <button class="btn-secondary" id="btn-test-draft" onclick="testDraft()">Score Move</button>
+                        <div class="recent-match-item" onclick="selectArchetype('elena'); switchTab('gym');">
+                            <span class="recent-dot"></span>
+                            <span>Elena (Sparring Gym)</span>
                         </div>
-                        <div id="draft-score-result" class="draft-result hidden" aria-live="polite"></div>
+                        <div class="recent-match-item" onclick="loadSampleDeadChat(); switchTab('autopsy');">
+                            <span class="recent-dot"></span>
+                            <span>Dead Chat Diagnostic</span>
+                        </div>
+                        <div class="recent-match-item" onclick="loadSampleBio(); switchTab('profile');">
+                            <span class="recent-dot"></span>
+                            <span>Hinge Bio Audit</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar Footer -->
+            <div class="sidebar-footer">
+                <div class="telemetry-row">
+                    <span class="live-indicator">
+                        <span class="live-dot"></span>
+                        <span>BYOK Engine Live</span>
+                    </span>
+                    <span>100% Private</span>
+                </div>
+                <div class="sidebar-stats-toggle" onclick="toggleStatsModal()">
+                    <span>Performance Metrics</span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Canvas Area -->
+        <main class="app-main">
+            <!-- Top Breadcrumb & Actions Bar -->
+            <header class="canvas-header">
+                <div class="breadcrumbs">
+                    <span>Workspaces</span>
+                    <span>/</span>
+                    <span class="breadcrumb-active" id="active-breadcrumb-label">Live Wingman & Subtext Decoder</span>
+                </div>
+                <div class="header-controls">
+                    <div class="status-pill">
+                        <span>Tone: Calibrated High-Status</span>
+                    </div>
+                    <button class="btn-subtle" id="canvas-header-action" onclick="loadSampleForCurrentTab()">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                        <span>Load Sample</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Main Canvas Viewport -->
+            <div class="canvas-body">
+                <!-- TAB 1: Live Wingman & Subtext Decoder -->
+                <div class="tab-content active" id="tab-wingman" role="tabpanel">
+                    <div class="workspace-grid">
+                        <!-- Left Editor Surface -->
+                        <div class="surface-card">
+                            <div class="surface-header">
+                                <span class="surface-title">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                                    Conversation Stream
+                                </span>
+                                <button class="btn-ghost" id="btn-load-sample-chat" onclick="loadSampleChat()">Load Chloe Sample</button>
+                            </div>
+                            <div class="surface-body">
+                                <div class="field-group">
+                                    <label class="field-label" for="match-name-input">Match Identifier / Contact</label>
+                                    <input type="text" id="match-name-input" class="input-box" placeholder="e.g. Jessica, Sophie" value="Chloe">
+                                </div>
+
+                                <div class="field-group" style="flex: 1;">
+                                    <label class="field-label" for="chat-history-input">Chat History (Paste ongoing messages)</label>
+                                    <textarea id="chat-history-input" class="textarea-box" rows="9" placeholder="Her: hey, what are you up to this weekend?&#10;Me: just grabbing dinner with friends. you?&#10;Her: haha nice, probably just staying in unless something fun comes up"></textarea>
+                                </div>
+
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <button class="btn-solid" id="btn-run-analysis" onclick="runAnalysis()">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                                        <span>Decode Subtext & Generate Moves</span>
+                                    </button>
+                                    <span style="font-size: 11px; color: var(--text-muted);"><kbd>⌘↵</kbd> to run</span>
+                                </div>
+
+                                <!-- Test Draft Scorer (Cringe Interceptor) -->
+                                <div class="draft-test-dock">
+                                    <div class="field-label" style="margin-bottom: 6px;">Cringe Interceptor (Score Your Draft)</div>
+                                    <div style="display: flex; gap: 8px;">
+                                        <input type="text" id="draft-test-input" class="input-box" placeholder="Type what you want to send before sending it...">
+                                        <button class="btn-subtle" id="btn-test-draft" onclick="testDraft()">Score</button>
+                                    </div>
+                                    <div id="draft-score-result" class="draft-response-box hidden" aria-live="polite"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right HUD Surface -->
+                        <div class="surface-card">
+                            <div class="surface-header">
+                                <span class="surface-title">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                                    Tactical Intelligence HUD
+                                </span>
+                                <span class="status-pill" id="report-interest-level">Awaiting Input</span>
+                            </div>
+                            <div class="surface-body" id="analysis-output-panel">
+                                <!-- Empty State -->
+                                <div id="wingman-empty-state" class="empty-hero">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                                    <h3>Awaiting Conversation</h3>
+                                    <p>Paste a conversation on the left to decode subtext, calculate frame dominance, and receive 3 calibrated tactical responses.</p>
+                                </div>
+
+                                <!-- Results View -->
+                                <div id="wingman-results" class="hidden" aria-live="polite">
+                                    <div class="hud-metrics-strip">
+                                        <div class="hud-metric-box">
+                                            <div class="hud-metric-kpi">Interest Score</div>
+                                            <div class="hud-metric-num" id="report-interest-score" style="color: var(--accent-primary);">--</div>
+                                        </div>
+                                        <div class="hud-metric-box">
+                                            <div class="hud-metric-kpi">Frame Control</div>
+                                            <div class="hud-metric-num" id="report-frame">Balanced</div>
+                                        </div>
+                                        <div class="hud-metric-box">
+                                            <div class="hud-metric-kpi">Investment Ratio</div>
+                                            <div class="hud-metric-num" id="report-investment">1 : 1.0</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Subtext Callout -->
+                                    <div class="callout-block">
+                                        <div class="callout-title">Psychological Subtext Translation</div>
+                                        <div class="callout-body" id="report-subtext">Loading subtext...</div>
+                                    </div>
+
+                                    <!-- Warnings Callout -->
+                                    <div class="warning-callout" id="report-warnings-box">
+                                        <div class="warning-title">Caution Flags & Frame Leaks</div>
+                                        <ul class="warning-list" id="report-warnings-list"></ul>
+                                    </div>
+
+                                    <!-- Tactical Moves Deck -->
+                                    <div style="margin-top: 10px;">
+                                        <div class="field-label" style="margin-bottom: 8px;">Calibrated Response Options</div>
+                                        <div class="move-list-deck" id="report-moves-list"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Analysis Output Panel -->
-                <div class="panel" id="analysis-output-panel">
-                    <div class="panel-header">
-                        <h2 class="panel-title">Tactical HUD Report</h2>
-                        <span class="telemetry-chip" id="report-interest-level">Awaiting Input</span>
+                <!-- TAB 2: The Rizz Gym (Interactive Sparring Arena) -->
+                <div class="tab-content" id="tab-gym" role="tabpanel">
+                    <div class="gym-container">
+                        <!-- Sparring Partner Pills Bar -->
+                        <div class="partner-pills-bar" id="archetype-cards-list">
+                            <div class="partner-pill active" onclick="selectArchetype('chloe')">
+                                <span class="partner-pill-avatar">C</span>
+                                <div>
+                                    <div class="partner-pill-name">Chloe</div>
+                                    <div class="partner-pill-tag">Banter Queen</div>
+                                </div>
+                            </div>
+                            <div class="partner-pill" onclick="selectArchetype('elena')">
+                                <span class="partner-pill-avatar">E</span>
+                                <div>
+                                    <div class="partner-pill-name">Elena</div>
+                                    <div class="partner-pill-tag">Skeptical Executive</div>
+                                </div>
+                            </div>
+                            <div class="partner-pill" onclick="selectArchetype('mia')">
+                                <span class="partner-pill-avatar">M</span>
+                                <div>
+                                    <div class="partner-pill-name">Mia</div>
+                                    <div class="partner-pill-tag">Dry Replier</div>
+                                </div>
+                            </div>
+                            <div class="partner-pill" onclick="selectArchetype('sofia')">
+                                <span class="partner-pill-avatar">S</span>
+                                <div>
+                                    <div class="partner-pill-name">Sofia</div>
+                                    <div class="partner-pill-tag">Spontaneous Creative</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Chat Arena Frame (Claude / ChatGPT style) -->
+                        <div class="chat-arena-frame">
+                            <div class="chat-arena-header">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span class="live-dot"></span>
+                                    <span style="font-weight: 600; font-size: 13px;" id="active-char-name">Chloe</span>
+                                    <span style="font-size: 11px; color: var(--text-muted);">· Real-Time Simulator</span>
+                                </div>
+                                <button class="btn-ghost" onclick="resetGym()">Reset Match</button>
+                            </div>
+
+                            <!-- Messages Viewport -->
+                            <div class="chat-stream-box" id="gym-chat-log" role="log" aria-live="polite">
+                                <div class="chat-row incoming">
+                                    <span class="chat-sender-tag" id="gym-opener-sender">Chloe</span>
+                                    <div class="chat-speech-bubble" id="gym-opener-bubble">Your profile looks like a curated advertisement for a good boy. Are you actually fun or just well-behaved?</div>
+                                </div>
+                            </div>
+
+                            <!-- Live Coach Sideline Dock -->
+                            <div class="sideline-dock" id="gym-sideline-box">
+                                <div class="sideline-header-line">
+                                    <span class="sideline-coach-badge">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+                                        Live Coach Feedback
+                                    </span>
+                                    <span class="status-pill" id="gym-turn-score" style="padding: 1px 6px;">Awaiting Move</span>
+                                </div>
+                                <div class="sideline-feedback-text" id="gym-sideline-text">She opened with a qualification test. Do NOT explain or defend yourself. Tease back or playfully amplify.</div>
+                            </div>
+
+                            <!-- Bottom Input Prompt Bar -->
+                            <div class="chat-prompt-bar">
+                                <input type="text" id="gym-user-input" class="input-box" placeholder="Message Chloe... (Press Enter to send)" onkeydown="if(event.key==='Enter') sendGymMessage()">
+                                <button class="btn-solid" id="btn-gym-send" onclick="sendGymMessage()">
+                                    <span>Send</span>
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                                </button>
+                            </div>
+                        </div>
                     </div>
+                </div>
 
-                    <!-- Empty State -->
-                    <div id="wingman-empty-state" class="empty-state">
-                        <div class="empty-icon" aria-hidden="true">
-                            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                <!-- TAB 3: Profile Lab & Bio Auditor -->
+                <div class="tab-content" id="tab-profile" role="tabpanel">
+                    <div class="workspace-grid">
+                        <div class="surface-card">
+                            <div class="surface-header">
+                                <span class="surface-title">Profile Document</span>
+                                <button class="btn-ghost" onclick="loadSampleBio()">Load Sample Bio</button>
+                            </div>
+                            <div class="surface-body">
+                                <div class="field-group">
+                                    <label class="field-label" for="profile-bio-input">Current Bio</label>
+                                    <textarea id="profile-bio-input" class="textarea-box" rows="4" placeholder="e.g. 6'0. Love dogs, traveling, gym, and good food. Fluent in sarcasm. Looking for a partner in crime."></textarea>
+                                </div>
+                                <div class="field-group">
+                                    <label class="field-label" for="profile-prompts-input">App Prompts (Hinge / Bumble Q&A)</label>
+                                    <textarea id="profile-prompts-input" class="textarea-box" rows="3" placeholder="e.g. Prompt: 'I'll know it's time to delete this app when...' -> Answer: 'I find someone who loves tacos'"></textarea>
+                                </div>
+                                <div class="field-group">
+                                    <label class="field-label" for="profile-photos-input">Photo Descriptions & Sequence</label>
+                                    <textarea id="profile-photos-input" class="textarea-box" rows="3" placeholder="Photo 1: Mirror selfie at gym&#10;Photo 2: Me in sunglasses on a boat&#10;Photo 3: Big group photo with 6 guys at a bar"></textarea>
+                                </div>
+                                <button class="btn-solid" id="btn-audit-profile" onclick="auditProfile()">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                                    <span>Run Profile Audit</span>
+                                </button>
+                            </div>
                         </div>
-                        <h3>No Active Chat Decoded</h3>
-                        <p>Paste a conversation on the left and click "Decode Subtext" or use the sample button to view frame analysis and 3 calculated moves.</p>
+
+                        <div class="surface-card">
+                            <div class="surface-header">
+                                <span class="surface-title">Audit Scorecard & Fixes</span>
+                                <span class="status-pill" id="profile-score-badge">Ready</span>
+                            </div>
+                            <div class="surface-body" id="profile-results-panel">
+                                <div id="profile-empty-state" class="empty-hero">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+                                    <h3>Awaiting Profile Data</h3>
+                                    <p>Enter your bio, prompts, or photo descriptions on the left to receive an objective critique, cliché detection, and 3 high-converting rewrites.</p>
+                                </div>
+
+                                <div id="profile-results" class="hidden" aria-live="polite">
+                                    <div class="score-hero-row">
+                                        <div class="score-hero-badge" id="profile-overall-score">72</div>
+                                        <div>
+                                            <div style="font-weight: 600; font-size: 13px;">Intrigue Rating</div>
+                                            <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;" id="profile-bio-critique">Loading...</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="field-label" style="margin-bottom: 6px;">Photo Sequence Assessment</div>
+                                    <div id="profile-photo-list" style="margin-bottom: 14px;"></div>
+
+                                    <div class="warning-callout">
+                                        <div class="warning-title">Low-Status Clichés Detected</div>
+                                        <ul class="warning-list" id="profile-cliches-list"></ul>
+                                    </div>
+
+                                    <div class="field-label" style="margin-bottom: 6px;">High-Converting Bio Rewrites</div>
+                                    <div class="move-list-deck" id="profile-bios-list"></div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
+                </div>
 
-                    <!-- Results Container -->
-                    <div id="wingman-results" class="hidden" aria-live="polite">
-                        <!-- HUD Metrics Row -->
-                        <div class="hud-metric-row">
-                            <div class="hud-metric-cell">
-                                <div class="hud-metric-label">Interest Rating</div>
-                                <div class="hud-metric-value" id="report-interest-score" style="color: var(--accent-primary);">--</div>
+                <!-- TAB 4: Chat Autopsy (Ghosting Diagnostic) -->
+                <div class="tab-content" id="tab-autopsy" role="tabpanel">
+                    <div class="workspace-grid">
+                        <div class="surface-card">
+                            <div class="surface-header">
+                                <span class="surface-title">Stalled Chat Forensic</span>
+                                <button class="btn-ghost" onclick="loadSampleDeadChat()">Load Dead Chat</button>
                             </div>
-                            <div class="hud-metric-cell">
-                                <div class="hud-metric-label">Frame Control</div>
-                                <div class="hud-metric-value" id="report-frame">Balanced</div>
-                            </div>
-                            <div class="hud-metric-cell">
-                                <div class="hud-metric-label">Investment Ratio</div>
-                                <div class="hud-metric-value" id="report-investment">1 : 1.0</div>
+                            <div class="surface-body">
+                                <div class="field-group" style="flex: 1;">
+                                    <label class="field-label" for="autopsy-history-input">Full Stalled Conversation</label>
+                                    <textarea id="autopsy-history-input" class="textarea-box" rows="12" placeholder="Me: Hey Chloe, how was your weekend?&#10;Her: Pretty good, just relaxing.&#10;Me: That's nice! Did you do anything fun or just chill at home?&#10;Her: Just watched Netflix.&#10;Me: Oh cool what show did you watch? I love TV shows too.&#10;[Ghosted - No reply for 4 days]"></textarea>
+                                </div>
+                                <button class="btn-solid" id="btn-run-autopsy" onclick="runAutopsy()">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                                    <span>Run Post-Mortem Diagnostic</span>
+                                </button>
                             </div>
                         </div>
 
-                        <!-- Subtext Box -->
-                        <div class="subtext-box">
-                            <div class="subtext-title">
-                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                                Psychological Subtext Translation
+                        <div class="surface-card">
+                            <div class="surface-header">
+                                <span class="surface-title">Forensic Autopsy Report</span>
+                                <span class="status-pill" id="autopsy-status-badge">Awaiting Data</span>
                             </div>
-                            <div class="subtext-body" id="report-subtext">Loading...</div>
+                            <div class="surface-body">
+                                <div id="autopsy-empty-state" class="empty-hero">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                                    <h3>Identify Momentum Loss</h3>
+                                    <p>Find out where the conversation died, whether it was interviewer-mode questioning or delayed scheduling, and calculate revival odds.</p>
+                                </div>
+
+                                <div id="autopsy-results" class="hidden" aria-live="polite">
+                                    <div class="warning-callout" style="margin-bottom: 12px;">
+                                        <div class="warning-title">The Fatal Turn (Momentum Death)</div>
+                                        <div style="font-size: 12.5px; color: var(--text-primary); font-weight: 500;" id="autopsy-fatal-turn">--</div>
+                                    </div>
+
+                                    <div class="callout-block" style="border-left-color: var(--accent-sky);">
+                                        <div class="callout-title">Root Cause Analysis</div>
+                                        <div class="callout-body" id="autopsy-root-cause" style="margin-bottom: 8px;">--</div>
+                                        <div style="font-size: 11px; color: var(--text-muted);">Revival Odds: <strong id="autopsy-recovery-prob" style="color: var(--accent-primary); font-family: var(--font-mono);">65%</strong></div>
+                                    </div>
+
+                                    <div class="field-label" style="margin-bottom: 6px;">Hail Mary Revival Messages</div>
+                                    <div class="move-list-deck" id="autopsy-revival-list"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 5: Dispatch & Automation -->
+                <div class="tab-content" id="tab-automation" role="tabpanel">
+                    <div style="display: flex; flex-direction: column; gap: 20px;">
+                        <div class="workspace-grid" style="height: auto;">
+                            <!-- Ingestion Simulator -->
+                            <div class="surface-card">
+                                <div class="surface-header">
+                                    <span class="surface-title">Pipeline Simulator</span>
+                                    <span class="status-pill">MODE: COPILOT</span>
+                                </div>
+                                <div class="surface-body">
+                                    <div class="field-group">
+                                        <label class="field-label" for="auto-incoming-input">Incoming Match Message</label>
+                                        <input type="text" id="auto-incoming-input" class="input-box" value="Yeah I had a great time! My number is 310-555-0199 text me there">
+                                    </div>
+                                    <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                                        <button class="btn-subtle" onclick="setAutoTest('number')">Number Won</button>
+                                        <button class="btn-subtle" onclick="setAutoTest('date')">Date Agreed</button>
+                                        <button class="btn-subtle" onclick="setAutoTest('ongoing')">Normal Banter</button>
+                                        <button class="btn-subtle" onclick="setAutoTest('rejection')">Rejection</button>
+                                    </div>
+                                    <button class="btn-solid" id="btn-run-auto-test" onclick="runAutomationTest()">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                                        <span>Test Intake Pipeline</span>
+                                    </button>
+
+                                    <div id="auto-decision-box" class="callout-block hidden" style="border-left-color: var(--accent-emerald); margin-top: 10px;" aria-live="polite">
+                                        <div style="display:flex; justify-content:space-between; margin-bottom: 4px;">
+                                            <span style="font-family: var(--font-mono); font-size: 11px; font-weight: 700; color: var(--accent-emerald-text);" id="auto-action-label">HANDOFF_TO_USER</span>
+                                            <span style="font-size: 10px; font-family: var(--font-mono); color: var(--text-muted);" id="auto-status-label">CONVERTED_NUMBER</span>
+                                        </div>
+                                        <div class="callout-body" id="auto-reason-text">Contact info detected. Immediate notification generated.</div>
+                                        <div style="font-size: 10.5px; font-family: var(--font-mono); color: var(--accent-sky-text); margin-top: 4px;" id="auto-delay-text">Anti-Detection Pacing: 0s</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Integration Architecture -->
+                            <div class="surface-card">
+                                <div class="surface-header">
+                                    <span class="surface-title">Connectors & Webhooks</span>
+                                </div>
+                                <div class="surface-body" style="font-size: 12.5px; gap: 12px;">
+                                    <div class="callout-block">
+                                        <div class="callout-title">1. Tinder Web & Instagram Connectors</div>
+                                        <div class="callout-body">Provide <code>TINDER_AUTH_TOKEN</code> or <code>INSTAGRAM_SESSION_ID</code> in <code>.env</code> to ingest matches and dispatch openers.</div>
+                                    </div>
+                                    <div class="callout-block">
+                                        <div class="callout-title">2. Telegram Copilot Remote</div>
+                                        <div class="callout-body">Set <code>TELEGRAM_BOT_TOKEN</code> to approve candidate messages directly from your phone with inline buttons.</div>
+                                    </div>
+                                    <div class="callout-block">
+                                        <div class="callout-title">3. Virtual Twilio SMS</div>
+                                        <div class="callout-body">Forward inbound text webhooks to <code>/webhooks/twilio</code> with randomized human jitter pacing.</div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <!-- Warnings Box -->
-                        <div class="alert-box" id="report-warnings-box">
-                            <div class="alert-title">
-                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                                Caution & Cringe Interceptions
+                        <!-- Outreach Approval Queue -->
+                        <div class="surface-card">
+                            <div class="surface-header">
+                                <div>
+                                    <span class="surface-title">Match Outreach & Approval Queue</span>
+                                    <p style="font-size: 11.5px; color: var(--text-muted); margin-top: 2px;">Review and approve generated openers before they are sent with anti-detection pacing.</p>
+                                </div>
+                                <div style="display: flex; gap: 8px;">
+                                    <button class="btn-solid" onclick="syncOutreach('tinder')">Sync Tinder</button>
+                                    <button class="btn-subtle" onclick="syncOutreach('instagram')">Sync Instagram</button>
+                                    <button class="btn-ghost" onclick="loadOutreachQueue()">Refresh</button>
+                                </div>
                             </div>
-                            <ul class="alert-list" id="report-warnings-list"></ul>
-                        </div>
-
-                        <!-- 3 Tactical Moves -->
-                        <div style="margin-top: 18px;">
-                            <div class="panel-header-sm">
-                                <h3>3 Calibrated Moves</h3>
+                            <div class="surface-body">
+                                <div id="outreach-empty-state" class="empty-hero" style="padding: 30px 20px;">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                                    <h3>No Pending Approvals</h3>
+                                    <p>Sync Tinder or Instagram above to scan for fresh matches and queue up personalized openers.</p>
+                                </div>
+                                <div id="outreach-queue-list" class="hidden"></div>
                             </div>
-                            <div class="moves-deck" id="report-moves-list"></div>
                         </div>
                     </div>
                 </div>
             </div>
         </main>
-
-        <!-- TAB 2: The Rizz Gym (Interactive Simulator) -->
-        <section class="tab-content" id="tab-gym" role="tabpanel" aria-labelledby="tab-gym-btn">
-            <!-- Archetype Selector Bar -->
-            <div class="gym-archetypes-bar" id="archetype-cards-list">
-                <div class="archetype-chip active" onclick="selectArchetype('chloe')">
-                    <div class="archetype-name">Chloe</div>
-                    <div class="archetype-tag">The Banter Queen</div>
-                    <p style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">Playful, sarcastic, tests if you fold easily under tease frames.</p>
-                </div>
-                <div class="archetype-chip" onclick="selectArchetype('elena')">
-                    <div class="archetype-name">Elena</div>
-                    <div class="archetype-tag">Skeptical Executive</div>
-                    <p style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">Demands competence. Zero patience for needy validation-seeking.</p>
-                </div>
-                <div class="archetype-chip" onclick="selectArchetype('mia')">
-                    <div class="archetype-name">Mia</div>
-                    <div class="archetype-tag">Dry Replier</div>
-                    <p style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">Sends 2-word replies. Forces you to create hooks without writing essays.</p>
-                </div>
-                <div class="archetype-chip" onclick="selectArchetype('sofia')">
-                    <div class="archetype-name">Sofia</div>
-                    <div class="archetype-tag">Spontaneous Creative</div>
-                    <p style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">Loves unexpected late-night topics, vibe checks, and witty banter.</p>
-                </div>
-            </div>
-
-            <!-- Arena Card -->
-            <div class="panel">
-                <div class="panel-header">
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <h2 class="panel-title" id="active-char-name">Chloe (The Banter Queen)</h2>
-                        <span class="telemetry-chip">
-                            <span class="status-dot"></span>
-                            <span>SPARRING LIVE</span>
-                        </span>
-                    </div>
-                    <button class="btn-text" onclick="resetGym()">Reset Match</button>
-                </div>
-
-                <!-- Chat Stream Viewport -->
-                <div class="gym-chat-viewport" id="gym-chat-log" role="log" aria-live="polite">
-                    <div class="chat-bubble-wrap incoming">
-                        <div class="bubble-sender" id="gym-opener-sender">Chloe</div>
-                        <div class="chat-bubble" id="gym-opener-bubble">Your profile looks like a curated advertisement for a good boy. Are you actually fun or just well-behaved?</div>
-                    </div>
-                </div>
-
-                <!-- Sideline Coach Dock -->
-                <div class="sideline-coach-dock" id="gym-sideline-box">
-                    <div class="sideline-header-row">
-                        <span class="sideline-coach-label">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
-                            Coach Sideline Telemetry
-                        </span>
-                        <span class="sideline-score-badge" id="gym-turn-score">Awaiting Round</span>
-                    </div>
-                    <div class="sideline-tip" id="gym-sideline-text">She opened with a playful qualification test. Do NOT explain or defend yourself. Tease back or amplify being a menace.</div>
-                </div>
-
-                <!-- Input bar -->
-                <div class="inline-input-group">
-                    <input type="text" id="gym-user-input" class="input-field" placeholder="Type your move (Press Enter to send)..." onkeydown="if(event.key==='Enter') sendGymMessage()">
-                    <button class="btn-primary" id="btn-gym-send" onclick="sendGymMessage()">
-                        <span>Send Move</span>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                    </button>
-                </div>
-            </div>
-        </section>
-
-        <!-- TAB 3: Profile & Bio Auditor -->
-        <section class="tab-content" id="tab-profile" role="tabpanel" aria-labelledby="tab-profile-btn">
-            <div class="grid-workspace">
-                <div class="panel">
-                    <div class="panel-header">
-                        <h2 class="panel-title">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                            Profile Lab & Bio Auditor
-                        </h2>
-                        <button class="btn-text" onclick="loadSampleBio()">Load Sample Bio</button>
-                    </div>
-                    <p class="panel-desc">Avoid the top 5 mistakes that kill swipe conversion: boring travel lists, gym mirror selfies, and generic clichés. Get 3 high-converting bio rewrites instantly.</p>
-
-                    <div class="form-group">
-                        <label class="form-label" for="profile-bio-input">Your Current Bio</label>
-                        <textarea id="profile-bio-input" class="textarea-field" rows="4" placeholder="e.g. 6'0. Love dogs, traveling, gym, and good food. Fluent in sarcasm. Looking for a partner in crime."></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="profile-prompts-input">Dating App Prompts (Hinge / Bumble Q&A)</label>
-                        <textarea id="profile-prompts-input" class="textarea-field" rows="3" placeholder="e.g. Prompt: 'I'll know it's time to delete this app when...' -> Answer: 'I find someone who loves tacos'"></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="profile-photos-input">Photo Sequence & Context</label>
-                        <textarea id="profile-photos-input" class="textarea-field" rows="3" placeholder="Photo 1: Mirror selfie at gym&#10;Photo 2: Me in sunglasses on a boat&#10;Photo 3: Big group photo with 6 guys at a bar"></textarea>
-                    </div>
-
-                    <button class="btn-primary" id="btn-audit-profile" onclick="auditProfile()">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                        <span>Audit Profile & Generate High-Value Bios</span>
-                    </button>
-                </div>
-
-                <div class="panel" id="profile-results-panel">
-                    <div class="panel-header">
-                        <h2 class="panel-title">Audit Scorecard & Fixes</h2>
-                        <span class="telemetry-chip" id="profile-score-badge">Ready</span>
-                    </div>
-
-                    <div id="profile-empty-state" class="empty-state">
-                        <div class="empty-icon" aria-hidden="true">
-                            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
-                        </div>
-                        <h3>Full Dating Profile Scorecard</h3>
-                        <p>Paste your bio, prompts, or photo descriptions to get an instant breakdown of red flags, cliché detection, and optimized rewrites.</p>
-                    </div>
-
-                    <div id="profile-results" class="hidden" aria-live="polite">
-                        <!-- Score Header -->
-                        <div class="profile-score-header">
-                            <div class="score-circle-big" id="profile-overall-score">72</div>
-                            <div>
-                                <h3 class="profile-critique-title">Profile Intrigue Rating</h3>
-                                <p class="profile-critique-text" id="profile-bio-critique">Loading critique...</p>
-                            </div>
-                        </div>
-
-                        <!-- Photo Audit Breakdown -->
-                        <div class="panel-header-sm">
-                            <h3>Photo Sequence Critique</h3>
-                        </div>
-                        <div class="photo-critique-list" id="profile-photo-list"></div>
-
-                        <!-- Cliches Flagged -->
-                        <div class="alert-box">
-                            <div class="alert-title">
-                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
-                                Low-Status Clichés Detected
-                            </div>
-                            <ul class="alert-list" id="profile-cliches-list"></ul>
-                        </div>
-
-                        <!-- Improved Bio Variations -->
-                        <div class="panel-header-sm" style="margin-top: 16px;">
-                            <h3>High-Converting Bio Rewrites</h3>
-                        </div>
-                        <div class="bio-variations" id="profile-bios-list"></div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- TAB 4: Chat Autopsy (Ghosting Diagnostic) -->
-        <section class="tab-content" id="tab-autopsy" role="tabpanel" aria-labelledby="tab-autopsy-btn">
-            <div class="grid-workspace">
-                <div class="panel">
-                    <div class="panel-header">
-                        <h2 class="panel-title">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-                            Post-Mortem Diagnostic (Why She Ghosted)
-                        </h2>
-                        <button class="btn-text" onclick="loadSampleDeadChat()">Load Dead Chat</button>
-                    </div>
-                    <p class="panel-desc">Paste the conversation that went cold. The engine identifies the exact message where tension was lost, computes the probability of revival, and crafts 3 recovery texts.</p>
-
-                    <div class="form-group">
-                        <label class="form-label" for="autopsy-history-input">Full Stalled Conversation</label>
-                        <textarea id="autopsy-history-input" class="textarea-field" rows="12" placeholder="Me: Hey Chloe, how was your weekend?
-Her: Pretty good, just relaxing.
-Me: That's nice! Did you do anything fun or just chill at home?
-Her: Just watched Netflix.
-Me: Oh cool what show did you watch? I love TV shows too.
-[Ghosted - No reply for 4 days]"></textarea>
-                    </div>
-
-                    <button class="btn-primary" id="btn-run-autopsy" onclick="runAutopsy()">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-                        <span>Run Post-Mortem & Generate Revival Moves</span>
-                    </button>
-                </div>
-
-                <div class="panel">
-                    <div class="panel-header">
-                        <h2 class="panel-title">Forensic Autopsy Report</h2>
-                        <span class="telemetry-chip" id="autopsy-status-badge">Awaiting Data</span>
-                    </div>
-
-                    <div id="autopsy-empty-state" class="empty-state">
-                        <div class="empty-icon" aria-hidden="true">
-                            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                        </div>
-                        <h3>Diagnose Conversation Fatalities</h3>
-                        <p>Most conversations die because of interviewer-mode questioning, premature escalation, or waiting too long to move to a date. Find the exact point of failure.</p>
-                    </div>
-
-                    <div id="autopsy-results" class="hidden" aria-live="polite">
-                        <div class="fatal-turn-card">
-                            <div class="fatal-title">
-                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                                The Fatal Turn (Point of Momentum Death)
-                            </div>
-                            <div class="fatal-text" id="autopsy-fatal-turn">--</div>
-                        </div>
-
-                        <div class="autopsy-cause-card">
-                            <div class="cause-title">Forensic Root Cause</div>
-                            <div class="cause-text" id="autopsy-root-cause">--</div>
-                            <div class="recovery-chance">
-                                <span>Revival Likelihood:</span>
-                                <strong id="autopsy-recovery-prob" style="color: var(--accent-primary); font-family: var(--font-mono);">65%</strong>
-                            </div>
-                        </div>
-
-                        <div class="panel-header-sm">
-                            <h3>Hail Mary Revival Moves</h3>
-                        </div>
-                        <div class="revival-list" id="autopsy-revival-list"></div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- TAB 5: Automation & Webhooks -->
-        <section class="tab-content" id="tab-automation" role="tabpanel" aria-labelledby="tab-automation-btn">
-            <div class="grid-workspace">
-                <div class="panel">
-                    <div class="panel-header">
-                        <h2 class="panel-title">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m10 15 5-3-5-3v6Z"/></svg>
-                            Automated Ingestion Pipeline Simulator
-                        </h2>
-                        <span class="telemetry-chip">MODE: COPILOT</span>
-                    </div>
-                    <p class="panel-desc">Test how the intake pipeline scores texts, detects conversions (phone numbers & dates), and schedules anti-detection human response delays.</p>
-
-                    <div class="form-group">
-                        <label class="form-label" for="auto-incoming-input">Incoming Text from Match</label>
-                        <input type="text" id="auto-incoming-input" class="input-field" value="Yeah I had a great time! My number is 310-555-0199 text me there">
-                    </div>
-
-                    <div class="btn-group-row" style="margin-bottom: 14px;">
-                        <button class="btn-secondary" onclick="setAutoTest('number')">Number Won</button>
-                        <button class="btn-secondary" onclick="setAutoTest('date')">Date Agreed</button>
-                        <button class="btn-secondary" onclick="setAutoTest('ongoing')">Normal Banter</button>
-                        <button class="btn-secondary" onclick="setAutoTest('rejection')">Rejection</button>
-                    </div>
-
-                    <button class="btn-primary" id="btn-run-auto-test" onclick="runAutomationTest()">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-                        <span>Process Through Pipeline</span>
-                    </button>
-
-                    <div id="auto-decision-box" class="decision-box hidden" aria-live="polite">
-                        <div class="decision-header">
-                            <span class="decision-action" id="auto-action-label">HANDOFF_TO_USER</span>
-                            <span class="decision-status" id="auto-status-label">CONVERTED_NUMBER</span>
-                        </div>
-                        <div class="decision-reason" id="auto-reason-text">Goal achieved! Contact info or date agreement secured.</div>
-                        <div class="decision-delay" id="auto-delay-text">Scheduled Pacing Delay: 0s (Instant notification to user)</div>
-                    </div>
-                </div>
-
-                <div class="panel">
-                    <div class="panel-header">
-                        <h2 class="panel-title">Integration Blueprint</h2>
-                    </div>
-                    <div class="setup-guide">
-                        <div class="setup-step">
-                            <div class="step-num">1</div>
-                            <div class="step-content">
-                                <h4>Tinder Web & Instagram Connectors</h4>
-                                <p>Set <code>TINDER_AUTH_TOKEN</code> or <code>INSTAGRAM_SESSION_ID</code> in <code>.env</code>. The engine automatically fetches matches, generates openers, and sends approval requests.</p>
-                            </div>
-                        </div>
-
-                        <div class="setup-step">
-                            <div class="step-num">2</div>
-                            <div class="step-content">
-                                <h4>Telegram Pocket Wingman with Approval Buttons</h4>
-                                <p>Set <code>TELEGRAM_BOT_TOKEN</code> and <code>TELEGRAM_CHAT_ID</code>. Whenever a match is found, receive a card on your phone with <b>[Approve & Schedule]</b>, <b>[Send Now]</b>, and <b>[Skip]</b> buttons.</p>
-                            </div>
-                        </div>
-
-                        <div class="setup-step">
-                            <div class="step-num">3</div>
-                            <div class="step-content">
-                                <h4>Virtual SMS via Twilio</h4>
-                                <p>Set Twilio SMS webhook to: <code>http://your-server:8000/webhooks/twilio</code> for automated conversational intake and anti-detection jitter pacing.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Outreach Approval Queue -->
-            <div class="panel" style="margin-top: 20px;">
-                <div class="panel-header">
-                    <div>
-                        <h2 class="panel-title">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 13V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12c0 1.1.9 2 2 2h9"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/><circle cx="18" cy="18" r="3"/><line x1="22" y1="22" x2="20.1" y2="20.1"/></svg>
-                            Match Outreach & Approval Queue (Copilot Mode)
-                        </h2>
-                        <p class="panel-desc">Review and approve AI-generated openers before they are sent. All messages are dispatched with randomized human pacing delays.</p>
-                    </div>
-                    <div class="btn-group-row">
-                        <button class="btn-primary" onclick="syncOutreach('tinder')">
-                            <span>Sync Tinder</span>
-                        </button>
-                        <button class="btn-secondary" onclick="syncOutreach('instagram')">
-                            <span>Sync Instagram</span>
-                        </button>
-                        <button class="btn-text" onclick="loadOutreachQueue()">Refresh Queue</button>
-                    </div>
-                </div>
-
-                <div id="outreach-empty-state" class="empty-state">
-                    <div class="empty-icon" aria-hidden="true">
-                        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-                    </div>
-                    <h3>No Pending Outreach Approvals</h3>
-                    <p>Click "Sync Tinder" or "Sync Instagram" above to scan for new matches and generate personalized, context-aware openers.</p>
-                </div>
-
-                <div id="outreach-queue-list" class="outreach-queue-container hidden"></div>
-            </div>
-        </section>
     </div>
 
-    <!-- Toast Notification Container -->
+    <!-- Telemetry & Performance Modal (Keeps main workspace uncluttered) -->
+    <div id="stats-modal" class="modal-backdrop hidden" onclick="if(event.target===this) toggleStatsModal()">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <div style="font-weight: 600; font-size: 14px;">Studio Efficiency Telemetry</div>
+                <button class="btn-ghost" onclick="toggleStatsModal()">✕</button>
+            </div>
+            <div class="modal-stats-grid" id="stats-bar">
+                <div class="modal-stat-box">
+                    <div class="hud-metric-kpi">Saved vs Human Coaches</div>
+                    <div class="hud-metric-num" id="stat-saved">{{ stats.money_saved_vs_dating_coach }}</div>
+                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Zero $3k bootcamps required</div>
+                </div>
+                <div class="modal-stat-box">
+                    <div class="hud-metric-kpi">Date Conversion Rate</div>
+                    <div class="hud-metric-num" id="stat-conversion">{{ stats.conversion_rate_percent }}%</div>
+                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Phone numbers & meetups</div>
+                </div>
+                <div class="modal-stat-box">
+                    <div class="hud-metric-kpi">Average Rizz Score</div>
+                    <div class="hud-metric-num" id="stat-rizz">{{ stats.average_rizz_score }}</div>
+                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Across 15k+ analyzed turns</div>
+                </div>
+                <div class="modal-stat-box">
+                    <div class="hud-metric-kpi">Protected Active Chats</div>
+                    <div class="hud-metric-num" id="stat-threads">{{ stats.total_conversations }}</div>
+                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Stored locally on disk</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications Container -->
     <div id="toast-container" class="toast-container" role="alert" aria-live="assertive"></div>
 
     <script src="/static/js/app.js"></script>

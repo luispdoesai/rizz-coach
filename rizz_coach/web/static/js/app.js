@@ -1,10 +1,19 @@
 // =========================================================
 // RizzCoach - Client Interactive Controller & Ergonomics Engine
-// Architecture: Studio UX, Keyboard Accelerators, Tactile Feedback
+// Architecture: Notion / Tana / OpenAI Studio Workstation
 // =========================================================
 
 let currentArchetype = "chloe";
 let gymHistory = [];
+let currentActiveTab = "wingman";
+
+const TAB_LABELS = {
+    wingman: "Live Wingman & Subtext Decoder",
+    gym: "The Rizz Gym (Interactive Sparring)",
+    profile: "Profile Lab & Bio Auditor",
+    autopsy: "Chat Autopsy (Ghosting Diagnostic)",
+    automation: "Dispatch Queue & Automation"
+};
 
 const SAMPLE_CHATS = {
     chloe: `Chloe: Your profile is so confusing. Are you a finance bro or a closet hipster?
@@ -28,7 +37,8 @@ const SAMPLE_BIOS = {
 // Navigation & Tab Switching
 // ----------------------------------------------------
 function switchTab(tabId) {
-    document.querySelectorAll('.tab-btn').forEach(btn => {
+    currentActiveTab = tabId;
+    document.querySelectorAll('.nav-item').forEach(btn => {
         btn.classList.remove('active');
         btn.setAttribute('aria-selected', 'false');
     });
@@ -38,6 +48,7 @@ function switchTab(tabId) {
 
     const activeBtn = document.getElementById(`tab-${tabId}-btn`);
     const activeContent = document.getElementById(`tab-${tabId}`);
+    const breadcrumbLabel = document.getElementById('active-breadcrumb-label');
 
     if (activeBtn) {
         activeBtn.classList.add('active');
@@ -46,9 +57,27 @@ function switchTab(tabId) {
     if (activeContent) {
         activeContent.classList.add('active');
     }
+    if (breadcrumbLabel && TAB_LABELS[tabId]) {
+        breadcrumbLabel.textContent = TAB_LABELS[tabId];
+    }
 
     if (tabId === 'automation') {
         loadOutreachQueue();
+    }
+}
+
+function loadSampleForCurrentTab() {
+    if (currentActiveTab === 'wingman') loadSampleChat();
+    else if (currentActiveTab === 'gym') resetGym();
+    else if (currentActiveTab === 'profile') loadSampleBio();
+    else if (currentActiveTab === 'autopsy') loadSampleDeadChat();
+    else if (currentActiveTab === 'automation') setAutoTest('number');
+}
+
+function toggleStatsModal() {
+    const modal = document.getElementById('stats-modal');
+    if (modal) {
+        modal.classList.toggle('hidden');
     }
 }
 
@@ -62,11 +91,11 @@ function showToast(message, type = 'info') {
     const toast = document.createElement('div');
     toast.className = 'toast';
 
-    let iconSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`;
+    let iconSvg = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`;
     if (type === 'success') {
-        iconSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent-emerald)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`;
+        iconSvg = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--accent-emerald)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`;
     } else if (type === 'warn') {
-        iconSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent-amber)" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
+        iconSvg = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--accent-amber)" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
     }
 
     toast.innerHTML = `<span>${iconSvg}</span><span>${escapeHtml(message)}</span>`;
@@ -74,10 +103,10 @@ function showToast(message, type = 'info') {
 
     setTimeout(() => {
         toast.style.opacity = '0';
-        toast.style.transform = 'translateY(8px)';
-        toast.style.transition = 'all 160ms ease';
-        setTimeout(() => toast.remove(), 180);
-    }, 2800);
+        toast.style.transform = 'translateY(6px)';
+        toast.style.transition = 'all 150ms ease';
+        setTimeout(() => toast.remove(), 160);
+    }, 2500);
 }
 
 // ----------------------------------------------------
@@ -89,17 +118,17 @@ function copyToClipboard(text, btnElement) {
             const originalHtml = btnElement.innerHTML;
             btnElement.classList.add('copied');
             btnElement.innerHTML = `
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                <span>Copied!</span>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>Copied</span>
             `;
             setTimeout(() => {
                 btnElement.classList.remove('copied');
                 btnElement.innerHTML = originalHtml;
             }, 1800);
         }
-        showToast("Copied to clipboard!", "success");
+        showToast("Copied to clipboard", "success");
     }).catch(() => {
-        showToast("Copied!", "success");
+        showToast("Copied", "success");
     });
 }
 
@@ -121,7 +150,7 @@ function loadSampleBio() {
     document.getElementById('profile-bio-input').value = SAMPLE_BIOS.bio;
     document.getElementById('profile-prompts-input').value = SAMPLE_BIOS.prompts;
     document.getElementById('profile-photos-input').value = SAMPLE_BIOS.photos;
-    showToast("Loaded sample bio & photo cues", "info");
+    showToast("Loaded sample bio & photo sequence", "info");
 }
 
 // ----------------------------------------------------
@@ -180,32 +209,32 @@ async function runAnalysis() {
 
         data.tactical_moves.forEach(move => {
             const card = document.createElement('div');
-            card.className = 'move-card';
+            card.className = 'move-entry-card';
             card.innerHTML = `
-                <div class="move-header">
-                    <span class="move-category">${escapeHtml(move.category)}</span>
-                    <span class="move-score">Rizz ${move.rizz_score}/100</span>
+                <div class="move-card-top">
+                    <span class="move-tag">${escapeHtml(move.category)}</span>
+                    <span class="move-score-chip">Rizz ${move.rizz_score}/100</span>
                 </div>
-                <div class="move-text-row">
-                    <span class="move-text">"${escapeHtml(move.text)}"</span>
+                <div class="move-quote-row">
+                    <span class="move-quote-text">"${escapeHtml(move.text)}"</span>
                     <button class="btn-copy" onclick="copyToClipboard('${escapeJs(move.text)}', this)">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
                         <span>Copy</span>
                     </button>
                 </div>
-                <div class="move-rationale">Tactical Rationale: ${escapeHtml(move.rationale)}</div>
+                <div class="move-reason">${escapeHtml(move.rationale)}</div>
             `;
             movesList.appendChild(card);
         });
 
-        showToast("Conversation decoded successfully!", "success");
+        showToast("Conversation decoded", "success");
     } catch (err) {
-        showToast("Error analyzing conversation.", "warn");
+        showToast("Error decoding conversation.", "warn");
         console.error(err);
     } finally {
         btn.disabled = false;
         btn.innerHTML = `
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
             <span>Decode Subtext & Generate Moves</span>
         `;
     }
@@ -239,25 +268,25 @@ async function testDraft() {
         let flagsHtml = (score.cringe_flags || []).map(f => `<div style="color: var(--accent-rose-text); font-size: 11.5px; margin-top: 3px;">• ${escapeHtml(f)}</div>`).join('');
 
         resultBox.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
                 <div style="display: flex; align-items: center; gap: 8px;">
-                    <span style="font-family: var(--font-mono); font-weight:700; font-size:15px; color:${badgeColor};">${score.score}/100</span>
-                    <span style="font-size: 11px; font-weight:600; padding: 2px 6px; border-radius: var(--radius-xs); background: var(--bg-surface); border: 1px solid var(--border-subtle); color: var(--text-secondary);">${score.letter_grade}</span>
+                    <span style="font-family: var(--font-mono); font-weight:700; font-size:14px; color:${badgeColor};">${score.score}/100</span>
+                    <span style="font-size: 10px; font-weight:600; padding: 1px 5px; border-radius: var(--radius-xs); background: var(--bg-surface); border: 1px solid var(--border-subtle); color: var(--text-secondary);">${score.letter_grade}</span>
                 </div>
-                <span style="font-size:11px; font-family: var(--font-mono); color:var(--text-muted);">Pacing: ${escapeHtml(score.pacing_rating)}</span>
+                <span style="font-size:10.5px; font-family: var(--font-mono); color:var(--text-muted);">Pacing: ${escapeHtml(score.pacing_rating)}</span>
             </div>
-            <p style="margin-bottom:6px; color:var(--text-primary); font-size:12.5px; line-height:1.45;">${escapeHtml(score.why_it_scored)}</p>
+            <p style="margin-bottom:6px; color:var(--text-secondary); font-size:12px; line-height:1.45;">${escapeHtml(score.why_it_scored)}</p>
             ${flagsHtml ? `<div style="margin-bottom:8px;">${flagsHtml}</div>` : ''}
             ${score.suggested_rewrite ? `
-                <div style="background:var(--bg-surface); border:1px solid var(--border-default); border-radius:var(--radius-sm); padding:10px 12px; margin-top:8px;">
+                <div style="background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:9px 11px; margin-top:6px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                        <span style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:var(--accent-primary);">Calibrated Rewrite (+20 Rizz)</span>
+                        <span style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:var(--accent-primary);">Calibrated Rewrite</span>
                         <button class="btn-copy" onclick="copyToClipboard('${escapeJs(score.suggested_rewrite)}', this)">
-                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
                             <span>Copy</span>
                         </button>
                     </div>
-                    <div style="font-size:13px; color:var(--text-primary);">"${escapeHtml(score.suggested_rewrite)}"</div>
+                    <div style="font-size:12.5px; color:var(--text-primary);">"${escapeHtml(score.suggested_rewrite)}"</div>
                 </div>
             ` : ''}
         `;
@@ -273,7 +302,7 @@ async function testDraft() {
 // ----------------------------------------------------
 function selectArchetype(archetypeId) {
     currentArchetype = archetypeId;
-    document.querySelectorAll('.archetype-chip').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll('.partner-pill').forEach(c => c.classList.remove('active'));
     if (window.event && window.event.currentTarget) {
         window.event.currentTarget.classList.add('active');
     }
@@ -299,35 +328,35 @@ function resetGym() {
     gymHistory.push({ role: starter.name, content: starter.opener });
 
     document.getElementById('gym-sideline-text').textContent = "Sparring match started. Match her frame, avoid qualifying yourself, and keep banter high.";
-    document.getElementById('gym-turn-score').textContent = "Awaiting Round";
+    document.getElementById('gym-turn-score').textContent = "Awaiting Move";
 }
 
 function appendGymMessage(sender, text, type) {
     const chatLog = document.getElementById('gym-chat-log');
-    const wrap = document.createElement('div');
-    wrap.className = `chat-bubble-wrap ${type}`;
-    wrap.innerHTML = `
-        <div class="bubble-sender">${escapeHtml(sender)}</div>
-        <div class="chat-bubble">${escapeHtml(text)}</div>
+    const row = document.createElement('div');
+    row.className = `chat-row ${type}`;
+    row.innerHTML = `
+        <span class="chat-sender-tag">${escapeHtml(sender)}</span>
+        <div class="chat-speech-bubble">${escapeHtml(text)}</div>
     `;
-    chatLog.appendChild(wrap);
+    chatLog.appendChild(row);
     chatLog.scrollTop = chatLog.scrollHeight;
 }
 
 function showGymTypingIndicator(senderName) {
     const chatLog = document.getElementById('gym-chat-log');
-    const wrap = document.createElement('div');
-    wrap.className = 'chat-bubble-wrap incoming';
-    wrap.id = 'gym-typing-bubble';
-    wrap.innerHTML = `
-        <div class="bubble-sender">${escapeHtml(senderName)}</div>
+    const row = document.createElement('div');
+    row.className = 'chat-row incoming';
+    row.id = 'gym-typing-bubble';
+    row.innerHTML = `
+        <span class="chat-sender-tag">${escapeHtml(senderName)}</span>
         <div class="typing-indicator">
             <span class="typing-dot"></span>
             <span class="typing-dot"></span>
             <span class="typing-dot"></span>
         </div>
     `;
-    chatLog.appendChild(wrap);
+    chatLog.appendChild(row);
     chatLog.scrollTop = chatLog.scrollHeight;
 }
 
@@ -348,7 +377,6 @@ async function sendGymMessage() {
     const btn = document.getElementById('btn-gym-send');
     btn.disabled = true;
 
-    // Show simulated typing indicator for natural conversational pacing
     const currentName = document.getElementById('active-char-name').textContent.split(' ')[0] || "Match";
     showGymTypingIndicator(currentName);
 
@@ -363,7 +391,7 @@ async function sendGymMessage() {
                     history: gymHistory
                 })
             }),
-            new Promise(r => setTimeout(r, 650)) // realistic typing pacing
+            new Promise(r => setTimeout(r, 600))
         ]);
 
         const data = await res.json();
@@ -374,9 +402,9 @@ async function sendGymMessage() {
         gymHistory.push({ role: data.character_name, content: data.character_reply });
 
         // Update sideline feedback
-        document.getElementById('gym-turn-score').textContent = `Move Score: ${data.coach_feedback.turn_rizz_score}/100`;
+        document.getElementById('gym-turn-score').textContent = `Move: ${data.coach_feedback.turn_rizz_score}/100`;
         document.getElementById('gym-sideline-text').innerHTML = `
-            <strong>${escapeHtml(data.coach_feedback.what_worked)}</strong><br>
+            <strong style="color:var(--text-primary);">${escapeHtml(data.coach_feedback.what_worked)}</strong><br>
             <span style="color:var(--accent-sky-text); margin-top: 3px; display: block;">Coach Tip: ${escapeHtml(data.coach_feedback.coaching_tip)}</span>
         `;
     } catch (err) {
@@ -417,7 +445,7 @@ async function auditProfile() {
         document.getElementById('profile-results').classList.remove('hidden');
 
         document.getElementById('profile-overall-score').textContent = data.overall_score;
-        document.getElementById('profile-score-badge').textContent = `Rating: ${data.overall_score}/100`;
+        document.getElementById('profile-score-badge').textContent = `Score: ${data.overall_score}/100`;
         document.getElementById('profile-bio-critique').textContent = data.bio_critique;
 
         // Photos critique
@@ -425,10 +453,10 @@ async function auditProfile() {
         photoList.innerHTML = '';
         data.photo_audit.forEach(p => {
             const item = document.createElement('div');
-            item.className = 'photo-item';
+            item.className = 'photo-audit-row';
             item.innerHTML = `
                 <div><strong>Photo ${p.photo_num}:</strong> ${escapeHtml(p.verdict)}</div>
-                <span class="telemetry-chip">${p.score}/100</span>
+                <span style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted);">${p.score}/100</span>
             `;
             photoList.appendChild(item);
         });
@@ -447,28 +475,28 @@ async function auditProfile() {
         biosList.innerHTML = '';
         data.improved_bios.forEach(b => {
             const card = document.createElement('div');
-            card.className = 'bio-card';
+            card.className = 'move-entry-card';
             card.innerHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                    <span class="bio-style-tag">${escapeHtml(b.style)}</span>
+                <div class="move-card-top">
+                    <span class="move-tag">${escapeHtml(b.style)}</span>
                     <button class="btn-copy" onclick="copyToClipboard('${escapeJs(b.bio)}', this)">
-                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
                         <span>Copy Bio</span>
                     </button>
                 </div>
-                <div class="bio-text-content">"${escapeHtml(b.bio)}"</div>
+                <div class="move-quote-text" style="font-style: italic;">"${escapeHtml(b.bio)}"</div>
             `;
             biosList.appendChild(card);
         });
 
-        showToast("Profile audit completed!", "success");
+        showToast("Profile audit completed", "success");
     } catch (err) {
         showToast("Error auditing profile.", "warn");
     } finally {
         btn.disabled = false;
         btn.innerHTML = `
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <span>Audit Profile & Generate High-Value Bios</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <span>Run Profile Audit</span>
         `;
     }
 }
@@ -508,29 +536,31 @@ async function runAutopsy() {
         revivalsList.innerHTML = '';
         data.revival_texts.forEach(r => {
             const card = document.createElement('div');
-            card.className = 'revival-card';
+            card.className = 'move-entry-card';
             card.innerHTML = `
-                <div class="revival-name">${escapeHtml(r.name)}</div>
-                <div class="move-text-row">
-                    <span class="move-text">"${escapeHtml(r.text)}"</span>
+                <div class="move-card-top">
+                    <span class="move-tag">${escapeHtml(r.name)}</span>
                     <button class="btn-copy" onclick="copyToClipboard('${escapeJs(r.text)}', this)">
-                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
                         <span>Copy</span>
                     </button>
                 </div>
-                <div class="move-rationale">Strategic Rationale: ${escapeHtml(r.why_it_works)}</div>
+                <div class="move-quote-row">
+                    <span class="move-quote-text">"${escapeHtml(r.text)}"</span>
+                </div>
+                <div class="move-reason">${escapeHtml(r.why_it_works)}</div>
             `;
             revivalsList.appendChild(card);
         });
 
-        showToast("Autopsy report ready!", "success");
+        showToast("Autopsy report ready", "success");
     } catch (err) {
         showToast("Error running autopsy.", "warn");
     } finally {
         btn.disabled = false;
         btn.innerHTML = `
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-            <span>Run Post-Mortem & Generate Revival Moves</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            <span>Run Post-Mortem Diagnostic</span>
         `;
     }
 }
@@ -567,9 +597,9 @@ async function runAutomationTest() {
         document.getElementById('auto-action-label').textContent = decision.action;
         document.getElementById('auto-status-label').textContent = decision.outcome_status;
         document.getElementById('auto-reason-text').textContent = decision.reason;
-        document.getElementById('auto-delay-text').textContent = `Calculated Anti-Detection Delay: ${decision.scheduled_delay_seconds}s`;
+        document.getElementById('auto-delay-text').textContent = `Anti-Detection Pacing: ${decision.scheduled_delay_seconds}s`;
 
-        showToast(`Intake Pipeline: ${decision.action}`, "info");
+        showToast(`Pipeline event: ${decision.action}`, "info");
     } catch (err) {
         showToast("Error processing automation.", "warn");
     }
@@ -581,6 +611,7 @@ async function runAutomationTest() {
 async function loadOutreachQueue() {
     const emptyState = document.getElementById('outreach-empty-state');
     const queueList = document.getElementById('outreach-queue-list');
+    const sidebarBadge = document.getElementById('sidebar-queue-badge');
     if (!queueList) return;
 
     try {
@@ -591,7 +622,16 @@ async function loadOutreachQueue() {
             emptyState.classList.remove('hidden');
             queueList.classList.add('hidden');
             queueList.innerHTML = '';
+            if (sidebarBadge) {
+                sidebarBadge.textContent = "Synced";
+                sidebarBadge.classList.remove('alert');
+            }
             return;
+        }
+
+        if (sidebarBadge) {
+            sidebarBadge.textContent = `${items.length} pending`;
+            sidebarBadge.classList.add('alert');
         }
 
         emptyState.classList.add('hidden');
@@ -608,19 +648,18 @@ async function loadOutreachQueue() {
             const delayStr = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
 
             card.innerHTML = `
-                <div class="outreach-header">
-                    <span class="outreach-name">Match: ${escapeHtml(item.match_name)}</span>
-                    <span class="outreach-platform-badge">${escapeHtml(item.platform.toUpperCase())}</span>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 6px;">
+                    <span style="font-weight: 600; font-size: 13px;">${escapeHtml(item.match_name)}</span>
+                    <span class="status-pill">${escapeHtml(item.platform.toUpperCase())}</span>
                 </div>
-                <div class="outreach-bio">Profile Cue: ${escapeHtml(item.match_bio || 'No bio provided')}</div>
-                <label style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px; display: block;">Proposed Opener (Edit before approving):</label>
-                <textarea class="outreach-edit-textarea" id="outreach-text-${item.id}" rows="2">${escapeHtml(item.proposed_text)}</textarea>
+                <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">Bio Cue: ${escapeHtml(item.match_bio || 'No bio provided')}</div>
+                <textarea class="textarea-box" id="outreach-text-${item.id}" rows="2" style="margin-bottom: 8px;">${escapeHtml(item.proposed_text)}</textarea>
                 <div class="outreach-meta-bar">
-                    <span class="outreach-delay-tag">Anti-Detection Pacing Delay: ${delayStr}</span>
-                    <div class="btn-group-row">
-                        <button class="btn-approve" onclick="approveOutreach('${item.id}', false)">Approve & Schedule</button>
-                        <button class="btn-send-now" onclick="approveOutreach('${item.id}', true)">Send Now</button>
-                        <button class="btn-reject" onclick="rejectOutreach('${item.id}')">Skip</button>
+                    <span style="font-size: 11px; font-family: var(--font-mono); color: var(--accent-sky-text);">Pacing Delay: ${delayStr}</span>
+                    <div style="display: flex; gap: 6px;">
+                        <button class="btn-solid" style="background:var(--accent-emerald); border-color:var(--accent-emerald);" onclick="approveOutreach('${item.id}', false)">Approve & Schedule</button>
+                        <button class="btn-subtle" onclick="approveOutreach('${item.id}', true)">Send Now</button>
+                        <button class="btn-ghost" style="color:var(--accent-rose-text);" onclick="rejectOutreach('${item.id}')">Skip</button>
                     </div>
                 </div>
             `;
@@ -670,7 +709,7 @@ async function approveOutreach(itemId, instant) {
         const result = await res.json();
 
         if (result.status === 'sent') {
-            showToast("Dispatched text immediately!", "success");
+            showToast("Dispatched opener immediately", "success");
         } else {
             showToast(`Approved! Scheduled with ${result.scheduled_delay}s delay.`, "success");
         }
@@ -678,15 +717,15 @@ async function approveOutreach(itemId, instant) {
         const card = document.getElementById(`outreach-card-${itemId}`);
         if (card) {
             card.style.opacity = '0';
-            card.style.transform = 'scale(0.97)';
-            card.style.transition = 'all 200ms ease';
+            card.style.transform = 'scale(0.98)';
+            card.style.transition = 'all 180ms ease';
             setTimeout(() => {
                 card.remove();
                 const remaining = document.querySelectorAll('.outreach-item-card');
                 if (remaining.length === 0) {
                     loadOutreachQueue();
                 }
-            }, 200);
+            }, 180);
         }
     } catch (err) {
         showToast("Error approving outreach.", "warn");
@@ -705,15 +744,15 @@ async function rejectOutreach(itemId) {
         const card = document.getElementById(`outreach-card-${itemId}`);
         if (card) {
             card.style.opacity = '0';
-            card.style.transform = 'scale(0.97)';
-            card.style.transition = 'all 200ms ease';
+            card.style.transform = 'scale(0.98)';
+            card.style.transition = 'all 180ms ease';
             setTimeout(() => {
                 card.remove();
                 const remaining = document.querySelectorAll('.outreach-item-card');
                 if (remaining.length === 0) {
                     loadOutreachQueue();
                 }
-            }, 200);
+            }, 180);
         }
     } catch (err) {
         showToast("Error rejecting outreach.", "warn");
@@ -740,7 +779,6 @@ document.addEventListener('keydown', (e) => {
         } else if (activeEl && activeEl.id === 'gym-user-input') {
             sendGymMessage();
         } else {
-            // Default action: decode wingman
             runAnalysis();
         }
         return;
