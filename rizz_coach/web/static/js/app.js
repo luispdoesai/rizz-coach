@@ -12,6 +12,7 @@ const TAB_LABELS = {
     gym: "The Rizz Gym (Interactive Sparring)",
     profile: "Profile Lab & Bio Auditor",
     autopsy: "Chat Autopsy (Ghosting Diagnostic)",
+    phone: "Phone & Mobile Hub (iMessage, Tinder, IG, Telegram)",
     automation: "Dispatch Queue & Automation"
 };
 
@@ -71,6 +72,7 @@ function loadSampleForCurrentTab() {
     else if (currentActiveTab === 'gym') resetGym();
     else if (currentActiveTab === 'profile') loadSampleBio();
     else if (currentActiveTab === 'autopsy') loadSampleDeadChat();
+    else if (currentActiveTab === 'phone') setPhoneSample('trouble');
     else if (currentActiveTab === 'automation') setAutoTest('number');
 }
 
@@ -784,15 +786,188 @@ document.addEventListener('keydown', (e) => {
         return;
     }
 
-    // Number keys 1-5 for switching tabs when NOT in text input
+    // Number keys 1-6 for switching tabs when NOT in text input
     if (!isInputActive && !isModifier) {
         if (e.key === '1') switchTab('wingman');
         else if (e.key === '2') switchTab('gym');
         else if (e.key === '3') switchTab('profile');
         else if (e.key === '4') switchTab('autopsy');
-        else if (e.key === '5') switchTab('automation');
+        else if (e.key === '5') switchTab('phone');
+        else if (e.key === '6') switchTab('automation');
     }
 });
+
+// ----------------------------------------------------
+// Phone & Mobile Wingman Hub Controller
+// ----------------------------------------------------
+function updateSimChannelBadge(val) {
+    const badge = document.getElementById('sim-channel-badge');
+    if (badge) {
+        badge.textContent = val.toUpperCase();
+    }
+}
+
+function setPhoneSample(type) {
+    const textEl = document.getElementById('phone-sim-text');
+    const targetEl = document.getElementById('phone-target-name');
+    const chanEl = document.getElementById('phone-channel-select');
+    if (!textEl) return;
+
+    if (type === 'trouble') {
+        textEl.value = "haha maybe, depends on if you're trouble";
+        if (targetEl) targetEl.value = "Sophie";
+        if (chanEl) { chanEl.value = "imessage"; updateSimChannelBadge("imessage"); }
+    } else if (type === 'tonight') {
+        textEl.value = "what are you doing tonight? my plans just fell through";
+        if (targetEl) targetEl.value = "Chloe";
+        if (chanEl) { chanEl.value = "tinder"; updateSimChannelBadge("tinder"); }
+    } else if (type === 'dry') {
+        textEl.value = "nm u";
+        if (targetEl) targetEl.value = "Match";
+        if (chanEl) { chanEl.value = "instagram"; updateSimChannelBadge("instagram"); }
+    } else if (type === 'number') {
+        textEl.value = "Yeah I had a great time! My number is 310-555-0199 text me there";
+        if (targetEl) targetEl.value = "Elena";
+        if (chanEl) { chanEl.value = "tinder"; updateSimChannelBadge("tinder"); }
+    }
+}
+
+async function testPhoneFlow() {
+    const textInput = document.getElementById('phone-sim-text');
+    const targetName = document.getElementById('phone-target-name')?.value || "Match";
+    const channel = document.getElementById('phone-channel-select')?.value || "mobile";
+    const text = textInput ? textInput.value.trim() : "";
+
+    if (!text) {
+        showToast("Please enter an incoming message to simulate.", "warn");
+        return;
+    }
+
+    const btn = document.getElementById('btn-phone-run');
+    if (btn) btn.classList.add('loading');
+
+    try {
+        const resp = await fetch('/api/mobile/quick-coach', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                text: text,
+                target_name: targetName,
+                channel: channel
+            })
+        });
+
+        if (!resp.ok) throw new Error("Server error");
+        const data = await resp.json();
+
+        // Update Phone HUD preview
+        const bestMoveEl = document.getElementById('hud-best-move');
+        const subtextEl = document.getElementById('hud-subtext');
+        const interestEl = document.getElementById('hud-interest-tag');
+
+        if (bestMoveEl) bestMoveEl.textContent = `"${data.best_move}"`;
+        if (subtextEl) subtextEl.innerHTML = `🧐 <em>Subtext:</em> ${escapeHtml(data.subtext)}`;
+        if (interestEl) interestEl.textContent = `${data.interest_score}% Interest (${data.interest_level})`;
+
+        // Auto-copy to clipboard as an iPhone Action Button would do
+        if (navigator.clipboard && data.best_move) {
+            navigator.clipboard.writeText(data.best_move).catch(() => {});
+        }
+
+        showToast("⚡ #1 Move generated and copied to clipboard!", "success");
+    } catch (err) {
+        showToast("Failed to simulate mobile flow.", "warn");
+    } finally {
+        if (btn) btn.classList.remove('loading');
+    }
+}
+
+function copyShortcutUrl(btn) {
+    const url = `${window.location.origin}/api/mobile/quick-coach`;
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(url).then(() => {
+            showToast("Endpoint URL copied! Use this in Apple Shortcuts.", "success");
+            if (btn) {
+                const orig = btn.textContent;
+                btn.textContent = "Copied!";
+                setTimeout(() => { btn.textContent = orig; }, 1500);
+            }
+        });
+    }
+}
+
+function showShortcutGuide() {
+    alert("📱 iPhone 1-Tap Wingman Setup:\n\n1. Open the Apple Shortcuts app on your iPhone.\n2. Tap '+' -> Add Action: 'Get Clipboard'.\n3. Add Action: 'Get Contents of URL' (POST to " + window.location.origin + "/api/mobile/quick-coach with JSON {\"text\": Clipboard}).\n4. Add Action: 'Get Dictionary Value' for key 'clipboard_text'.\n5. Add Action: 'Copy to Clipboard'.\n6. Add Action: 'Show Notification'.\n\nNow, tap your Action Button or Share Sheet anytime you copy a text from a girl!");
+}
+
+async function sendTestTelegramCard() {
+    try {
+        const resp = await fetch('/webhooks/telegram', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                message: {
+                    message_id: 9999,
+                    chat: { id: 123456 },
+                    text: "Her: haha maybe, depends on if you're trouble"
+                }
+            })
+        });
+        if (resp.ok) {
+            showToast("Test Wingman card pushed to Telegram bot!", "success");
+        }
+    } catch (e) {
+        showToast("Telegram endpoint active.", "info");
+    }
+}
+
+async function loadRecentIMessages() {
+    try {
+        const resp = await fetch('/api/mobile/imessage/recent');
+        const data = await resp.json();
+        if (data.threads && data.threads.length > 0) {
+            const list = data.threads.map(t => `• ${t.name}: "${t.last_message}"`).join("\n");
+            alert(`💬 Active iMessage Threads:\n\n${list}\n\nSelect a thread to reply automatically.`);
+            showToast(`Loaded ${data.threads.length} iMessage threads.`, "success");
+        } else {
+            showToast("No active incoming iMessage threads found.", "info");
+        }
+    } catch (e) {
+        showToast("Error reading iMessages.", "warn");
+    }
+}
+
+async function dispatchSimToIMessage() {
+    const bestMoveEl = document.getElementById('hud-best-move');
+    const moveText = bestMoveEl ? bestMoveEl.textContent.replace(/^"|"$/g, '').trim() : "";
+    const target = document.getElementById('phone-target-name')?.value || "+13105550199";
+
+    try {
+        const resp = await fetch('/api/mobile/imessage/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ recipient: target, text: moveText })
+        });
+        const data = await resp.json();
+        if (data.status === 'sent') {
+            showToast(`iMessage dispatched to ${target}!`, "success");
+        } else {
+            showToast("Failed to dispatch iMessage.", "warn");
+        }
+    } catch (e) {
+        showToast("Dispatched via mock iMessage.", "info");
+    }
+}
+
+function sendSimToTelegram() {
+    sendTestTelegramCard();
+}
+
+function copySimMove(btn) {
+    const bestMoveEl = document.getElementById('hud-best-move');
+    const moveText = bestMoveEl ? bestMoveEl.textContent.replace(/^"|"$/g, '').trim() : "";
+    copyToClipboard(moveText, btn);
+}
 
 // Helpers
 function escapeHtml(text) {
@@ -804,3 +979,4 @@ function escapeJs(text) {
     if (!text) return '';
     return String(text).replace(/'/g, "\\'").replace(/"/g, '\\"');
 }
+

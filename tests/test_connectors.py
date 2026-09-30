@@ -140,3 +140,111 @@ async def test_telegram_webhook_callback_buttons():
         # Verify item status changed
         updated = db.get_outreach_item("tg_test_123")
         assert updated["status"] in ["APPROVED", "SENT"]
+
+@pytest.mark.asyncio
+async def test_imessage_connector_methods():
+    from rizz_coach.connectors.imessage import imessage_connector
+    
+    # 1. Matches/recent threads
+    matches = await imessage_connector.fetch_new_matches()
+    assert isinstance(matches, list)
+    assert len(matches) > 0
+    assert "name" in matches[0]
+    assert "last_message" in matches[0]
+
+    # 2. Fetch history
+    history = await imessage_connector.fetch_chat_history(matches[0]["match_id"])
+    assert isinstance(history, str)
+    assert len(history) > 0
+
+    # 3. Send message
+    ok = await imessage_connector.send_message(matches[0]["match_id"], "Test reply from RizzCoach")
+    assert ok is True
+
+@pytest.mark.asyncio
+async def test_mobile_quick_coach_endpoints():
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        # 1. Quick Coach endpoint for iOS Action Button / Shortcuts
+        resp = await client.post("/api/mobile/quick-coach", json={
+            "text": "haha maybe, depends on if you're trouble",
+            "target_name": "Sophie",
+            "channel": "imessage"
+        })
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["status"] == "success"
+        assert "best_move" in data
+        assert "clipboard_text" in data
+        assert len(data["moves"]) > 0
+        assert "ios_hud" in data
+        assert "trouble" in data["ios_hud"].lower() or "best move" in data["ios_hud"].lower()
+
+        # 2. iOS Shortcut guide
+        guide_resp = await client.get("/api/mobile/shortcut/guide")
+        assert guide_resp.status_code == 200
+        assert "setup_steps" in guide_resp.json()
+
+        # 3. iMessage recent threads
+        recent_resp = await client.get("/api/mobile/imessage/recent")
+        assert recent_resp.status_code == 200
+        assert "threads" in recent_resp.json()
+
+        # 4. iMessage send
+        send_resp = await client.post("/api/mobile/imessage/send", json={
+            "recipient": "+13105550199",
+            "text": "Sounds good, see you at 8."
+        })
+        assert send_resp.status_code == 200
+        assert send_resp.json()["status"] == "sent"
+
+        # 5. iMessage tactical reply generator
+        reply_resp = await client.post("/api/mobile/imessage/tactical-reply", json={
+            "recipient": "+13105550199",
+            "context_text": "Her: what are you doing tonight?\nMe: debating if I want to be productive or reckless.",
+            "auto_send": False
+        })
+        assert reply_resp.status_code == 200
+        reply_data = reply_resp.json()
+        assert "best_move" in reply_data
+        assert reply_data["dispatched"] is False
+
+@pytest.mark.asyncio
+async def test_telegram_mobile_commands():
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        # Test /score command
+        score_payload = {
+            "message": {
+                "message_id": 201,
+                "chat": {"id": 998877},
+                "text": "/score You are the most beautiful goddess in the world please reply"
+            }
+        }
+        score_resp = await client.post("/webhooks/telegram", json=score_payload)
+        assert score_resp.status_code == 200
+        assert score_resp.json()["status"] == "scored"
+
+        # Test /sync command
+        sync_payload = {
+            "message": {
+                "message_id": 202,
+                "chat": {"id": 998877},
+                "text": "/sync"
+            }
+        }
+        sync_resp = await client.post("/webhooks/telegram", json=sync_payload)
+        assert sync_resp.status_code == 200
+        assert sync_resp.json()["status"] == "synced"
+
+        # Test /imessage command
+        imessage_payload = {
+            "message": {
+                "message_id": 203,
+                "chat": {"id": 998877},
+                "text": "/imessage recent"
+            }
+        }
+        imsg_resp = await client.post("/webhooks/telegram", json=imessage_payload)
+        assert imsg_resp.status_code == 200
+        assert imsg_resp.json()["status"] == "imessage_recent"

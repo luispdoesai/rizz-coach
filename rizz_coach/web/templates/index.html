@@ -66,12 +66,19 @@
                             </div>
                             <kbd>4</kbd>
                         </button>
+                        <button class="nav-item" id="tab-phone-btn" role="tab" aria-selected="false" onclick="switchTab('phone')">
+                            <div class="nav-item-left">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+                                <span>Phone & DMs Hub</span>
+                            </div>
+                            <kbd>5</kbd>
+                        </button>
                         <button class="nav-item" id="tab-automation-btn" role="tab" aria-selected="false" onclick="switchTab('automation')">
                             <div class="nav-item-left">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
                                 <span>Dispatch Queue</span>
                             </div>
-                            <span class="nav-badge-pill" id="sidebar-queue-badge">Sync</span>
+                            <kbd>6</kbd>
                         </button>
                     </nav>
 
@@ -129,7 +136,7 @@
                     </div>
                     <button class="btn-subtle" id="canvas-header-action" onclick="loadSampleForCurrentTab()">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-                        <span>Load Sample</span>
+                        <span>Reset Sample</span>
                     </button>
                 </div>
             </header>
@@ -146,7 +153,7 @@
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                                     Conversation Stream
                                 </span>
-                                <button class="btn-ghost" id="btn-load-sample-chat" onclick="loadSampleChat()">Load Chloe Sample</button>
+                                <button class="btn-ghost" id="btn-load-sample-chat" onclick="loadSampleChat()">Reset Sample</button>
                             </div>
                             <div class="surface-body">
                                 <div class="field-group">
@@ -156,7 +163,9 @@
 
                                 <div class="field-group" style="flex: 1;">
                                     <label class="field-label" for="chat-history-input">Chat History (Paste ongoing messages)</label>
-                                    <textarea id="chat-history-input" class="textarea-box" rows="9" placeholder="Her: hey, what are you up to this weekend?&#10;Me: just grabbing dinner with friends. you?&#10;Her: haha nice, probably just staying in unless something fun comes up"></textarea>
+                                    <textarea id="chat-history-input" class="textarea-box" rows="9">Chloe: Your profile is so confusing. Are you a finance bro or a closet hipster?
+Me: I wear Patagonia vests while buying vinyl records. Peak identity crisis.
+Chloe: haha oh god, that's tragic. What's the last record you bought then?</textarea>
                                 </div>
 
                                 <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -171,7 +180,7 @@
                                 <div class="draft-test-dock">
                                     <div class="field-label" style="margin-bottom: 6px;">Cringe Interceptor (Score Your Draft)</div>
                                     <div style="display: flex; gap: 8px;">
-                                        <input type="text" id="draft-test-input" class="input-box" placeholder="Type what you want to send before sending it...">
+                                        <input type="text" id="draft-test-input" class="input-box" placeholder="Type what you want to send before sending it..." value="Fleetwood Mac Rumours, naturally. Judge me.">
                                         <button class="btn-subtle" id="btn-test-draft" onclick="testDraft()">Score</button>
                                     </div>
                                     <div id="draft-score-result" class="draft-response-box hidden" aria-live="polite"></div>
@@ -186,49 +195,97 @@
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
                                     Tactical Intelligence HUD
                                 </span>
-                                <span class="status-pill" id="report-interest-level">Awaiting Input</span>
+                                <span class="status-pill" id="report-interest-level">High — Playful Banter</span>
                             </div>
                             <div class="surface-body" id="analysis-output-panel">
-                                <!-- Empty State -->
-                                <div id="wingman-empty-state" class="empty-hero">
+                                <!-- Empty State (hidden by default since sample is active) -->
+                                <div id="wingman-empty-state" class="empty-hero hidden">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
                                     <h3>Awaiting Conversation</h3>
                                     <p>Paste a conversation on the left to decode subtext, calculate frame dominance, and receive 3 calibrated tactical responses.</p>
                                 </div>
 
-                                <!-- Results View -->
-                                <div id="wingman-results" class="hidden" aria-live="polite">
+                                <!-- Live Initial Tactical Report -->
+                                <div id="wingman-results" aria-live="polite">
                                     <div class="hud-metrics-strip">
                                         <div class="hud-metric-box">
                                             <div class="hud-metric-kpi">Interest Score</div>
-                                            <div class="hud-metric-num" id="report-interest-score" style="color: var(--accent-primary);">--</div>
+                                            <div class="hud-metric-num" id="report-interest-score" style="color: var(--accent-primary);">88/100</div>
                                         </div>
                                         <div class="hud-metric-box">
                                             <div class="hud-metric-kpi">Frame Control</div>
-                                            <div class="hud-metric-num" id="report-frame">Balanced</div>
+                                            <div class="hud-metric-num" id="report-frame">Playfully Contested</div>
                                         </div>
                                         <div class="hud-metric-box">
                                             <div class="hud-metric-kpi">Investment Ratio</div>
-                                            <div class="hud-metric-num" id="report-investment">1 : 1.0</div>
+                                            <div class="hud-metric-num" id="report-investment">1 : 1.1 (Balanced)</div>
                                         </div>
                                     </div>
 
                                     <!-- Subtext Callout -->
                                     <div class="callout-block">
                                         <div class="callout-title">Psychological Subtext Translation</div>
-                                        <div class="callout-body" id="report-subtext">Loading subtext...</div>
+                                        <div class="callout-body" id="report-subtext">She is genuinely amused and testing whether your taste is authentic or a pose. She gave you a clear hook by asking an open question. Maintain self-deprecating confidence.</div>
                                     </div>
 
                                     <!-- Warnings Callout -->
                                     <div class="warning-callout" id="report-warnings-box">
                                         <div class="warning-title">Caution Flags & Frame Leaks</div>
-                                        <ul class="warning-list" id="report-warnings-list"></ul>
+                                        <ul class="warning-list" id="report-warnings-list">
+                                            <li>Do not write an encyclopedic essay about indie vinyl. Keep it teasing.</li>
+                                            <li>Turn her question around so she has to qualify her music taste too.</li>
+                                        </ul>
                                     </div>
 
                                     <!-- Tactical Moves Deck -->
                                     <div style="margin-top: 10px;">
                                         <div class="field-label" style="margin-bottom: 8px;">Calibrated Response Options</div>
-                                        <div class="move-list-deck" id="report-moves-list"></div>
+                                        <div class="move-list-deck" id="report-moves-list">
+                                            <div class="move-entry-card">
+                                                <div class="move-card-top">
+                                                    <span class="move-tag">Banter / Push-Pull</span>
+                                                    <span class="move-score-chip">Rizz 92/100</span>
+                                                </div>
+                                                <div class="move-quote-row">
+                                                    <span class="move-quote-text">"Fleetwood Mac Rumours, naturally. But only because my Taylor Swift vinyl hasn't shipped yet."</span>
+                                                    <button class="btn-copy" onclick="copyToClipboard('Fleetwood Mac Rumours, naturally. But only because my Taylor Swift vinyl hasn\'t shipped yet.', this)">
+                                                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                                                        <span>Copy</span>
+                                                    </button>
+                                                </div>
+                                                <div class="move-reason">Owns the hipster trope unapologetically while adding unexpected self-deprecating humor.</div>
+                                            </div>
+
+                                            <div class="move-entry-card">
+                                                <div class="move-card-top">
+                                                    <span class="move-tag">Challenge / Re-Frame</span>
+                                                    <span class="move-score-chip">Rizz 87/100</span>
+                                                </div>
+                                                <div class="move-quote-row">
+                                                    <span class="move-quote-text">"I'll tell you over a drink, but only if you promise your music taste isn't 100% Spotify top 50."</span>
+                                                    <button class="btn-copy" onclick="copyToClipboard('I\'ll tell you over a drink, but only if you promise your music taste isn\'t 100% Spotify top 50.', this)">
+                                                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                                                        <span>Copy</span>
+                                                    </button>
+                                                </div>
+                                                <div class="move-reason">Sets up a casual in-person transition while teasingly screening her taste.</div>
+                                            </div>
+
+                                            <div class="move-entry-card">
+                                                <div class="move-card-top">
+                                                    <span class="move-tag">Playful Intrigue</span>
+                                                    <span class="move-score-chip">Rizz 84/100</span>
+                                                </div>
+                                                <div class="move-quote-row">
+                                                    <span class="move-quote-text">"An obscure French jazz record that makes me look cultured until I put it on and have no idea what they're saying."</span>
+                                                    <button class="btn-copy" onclick="copyToClipboard('An obscure French jazz record that makes me look cultured until I put it on and have no idea what they\'re saying.', this)">
+                                                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                                                        <span>Copy</span>
+                                                    </button>
+                                                </div>
+                                                <div class="move-reason">Hilarious self-awareness that disarms her test completely.</div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -297,9 +354,9 @@
                                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
                                         Live Coach Feedback
                                     </span>
-                                    <span class="status-pill" id="gym-turn-score" style="padding: 1px 6px;">Awaiting Move</span>
+                                    <span class="status-pill" id="gym-turn-score" style="padding: 1px 6px;">Round 1 Ready</span>
                                 </div>
-                                <div class="sideline-feedback-text" id="gym-sideline-text">She opened with a qualification test. Do NOT explain or defend yourself. Tease back or playfully amplify.</div>
+                                <div class="sideline-feedback-text" id="gym-sideline-text">She opened with a qualification test. Do NOT explain or defend yourself. Tease back or playfully amplify being a menace.</div>
                             </div>
 
                             <!-- Bottom Input Prompt Bar -->
@@ -320,20 +377,23 @@
                         <div class="surface-card">
                             <div class="surface-header">
                                 <span class="surface-title">Profile Document</span>
-                                <button class="btn-ghost" onclick="loadSampleBio()">Load Sample Bio</button>
+                                <button class="btn-ghost" onclick="loadSampleBio()">Reset Sample Bio</button>
                             </div>
                             <div class="surface-body">
                                 <div class="field-group">
                                     <label class="field-label" for="profile-bio-input">Current Bio</label>
-                                    <textarea id="profile-bio-input" class="textarea-box" rows="4" placeholder="e.g. 6'0. Love dogs, traveling, gym, and good food. Fluent in sarcasm. Looking for a partner in crime."></textarea>
+                                    <textarea id="profile-bio-input" class="textarea-box" rows="4">6'1. Love hiking, tacos, traveling, gym, and hanging out with my dog. Fluent in sarcasm. Looking for my partner in crime.</textarea>
                                 </div>
                                 <div class="field-group">
                                     <label class="field-label" for="profile-prompts-input">App Prompts (Hinge / Bumble Q&A)</label>
-                                    <textarea id="profile-prompts-input" class="textarea-box" rows="3" placeholder="e.g. Prompt: 'I'll know it's time to delete this app when...' -> Answer: 'I find someone who loves tacos'"></textarea>
+                                    <textarea id="profile-prompts-input" class="textarea-box" rows="3">Prompt: The secret to getting along with me...
+Answer: Don't take life too seriously and feed me pizza.</textarea>
                                 </div>
                                 <div class="field-group">
                                     <label class="field-label" for="profile-photos-input">Photo Descriptions & Sequence</label>
-                                    <textarea id="profile-photos-input" class="textarea-box" rows="3" placeholder="Photo 1: Mirror selfie at gym&#10;Photo 2: Me in sunglasses on a boat&#10;Photo 3: Big group photo with 6 guys at a bar"></textarea>
+                                    <textarea id="profile-photos-input" class="textarea-box" rows="3">Photo 1: Gym mirror selfie
+Photo 2: Sunglasses on a yacht
+Photo 3: Big group shot where everyone is wearing hats</textarea>
                                 </div>
                                 <button class="btn-solid" id="btn-audit-profile" onclick="auditProfile()">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -345,34 +405,62 @@
                         <div class="surface-card">
                             <div class="surface-header">
                                 <span class="surface-title">Audit Scorecard & Fixes</span>
-                                <span class="status-pill" id="profile-score-badge">Ready</span>
+                                <span class="status-pill" id="profile-score-badge">Audited: 68/100</span>
                             </div>
                             <div class="surface-body" id="profile-results-panel">
-                                <div id="profile-empty-state" class="empty-hero">
+                                <div id="profile-empty-state" class="empty-hero hidden">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
                                     <h3>Awaiting Profile Data</h3>
                                     <p>Enter your bio, prompts, or photo descriptions on the left to receive an objective critique, cliché detection, and 3 high-converting rewrites.</p>
                                 </div>
 
-                                <div id="profile-results" class="hidden" aria-live="polite">
+                                <div id="profile-results" aria-live="polite">
                                     <div class="score-hero-row">
-                                        <div class="score-hero-badge" id="profile-overall-score">72</div>
+                                        <div class="score-hero-badge" id="profile-overall-score">68</div>
                                         <div>
-                                            <div style="font-weight: 600; font-size: 13px;">Intrigue Rating</div>
-                                            <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;" id="profile-bio-critique">Loading...</div>
+                                            <div style="font-weight: 600; font-size: 13px;">Intrigue Rating: Moderate Generic</div>
+                                            <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;" id="profile-bio-critique">Contains 3 high-frequency clichés ("partner in crime", "fluent in sarcasm", "feed me tacos"). Good raw appeal but lacks specific narrative hooks.</div>
                                         </div>
                                     </div>
 
                                     <div class="field-label" style="margin-bottom: 6px;">Photo Sequence Assessment</div>
-                                    <div id="profile-photo-list" style="margin-bottom: 14px;"></div>
+                                    <div id="profile-photo-list" style="margin-bottom: 14px;">
+                                        <div class="photo-audit-row">
+                                            <div><strong>Photo 1:</strong> Mirror selfie at gym — Signals low effort. Replace with candid shot.</div>
+                                            <span style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-rose-text);">55/100</span>
+                                        </div>
+                                        <div class="photo-audit-row">
+                                            <div><strong>Photo 2:</strong> Sunglasses on boat — Sunglasses hide eye contact. Move to 4th slot.</div>
+                                            <span style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-amber-text);">70/100</span>
+                                        </div>
+                                        <div class="photo-audit-row">
+                                            <div><strong>Photo 3:</strong> Group photo with hats — Confusing. Match cannot tell who you are.</div>
+                                            <span style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-rose-text);">60/100</span>
+                                        </div>
+                                    </div>
 
                                     <div class="warning-callout">
                                         <div class="warning-title">Low-Status Clichés Detected</div>
-                                        <ul class="warning-list" id="profile-cliches-list"></ul>
+                                        <ul class="warning-list" id="profile-cliches-list">
+                                            <li>"Fluent in sarcasm" — Flagged on 42% of profiles; signals passive-aggressive humor.</li>
+                                            <li>"Partner in crime" — Universal cliché that adds zero personality.</li>
+                                            <li>Gym mirror selfie — Reduces swipe-right conversion by 34%.</li>
+                                        </ul>
                                     </div>
 
                                     <div class="field-label" style="margin-bottom: 6px;">High-Converting Bio Rewrites</div>
-                                    <div class="move-list-deck" id="profile-bios-list"></div>
+                                    <div class="move-list-deck" id="profile-bios-list">
+                                        <div class="move-entry-card">
+                                            <div class="move-card-top">
+                                                <span class="move-tag">High-Status Mystery</span>
+                                                <button class="btn-copy" onclick="copyToClipboard('6\'1. Building things by day, hunting for the city\'s most obscure vinyl and espresso by night. Tell me your worst hot take.', this)">
+                                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                                                    <span>Copy Bio</span>
+                                                </button>
+                                            </div>
+                                            <div class="move-quote-text" style="font-style: italic;">"6'1. Building things by day, hunting for the city's most obscure vinyl and espresso by night. Tell me your worst hot take."</div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -385,12 +473,17 @@
                         <div class="surface-card">
                             <div class="surface-header">
                                 <span class="surface-title">Stalled Chat Forensic</span>
-                                <button class="btn-ghost" onclick="loadSampleDeadChat()">Load Dead Chat</button>
+                                <button class="btn-ghost" onclick="loadSampleDeadChat()">Reset Sample</button>
                             </div>
                             <div class="surface-body">
                                 <div class="field-group" style="flex: 1;">
                                     <label class="field-label" for="autopsy-history-input">Full Stalled Conversation</label>
-                                    <textarea id="autopsy-history-input" class="textarea-box" rows="12" placeholder="Me: Hey Chloe, how was your weekend?&#10;Her: Pretty good, just relaxing.&#10;Me: That's nice! Did you do anything fun or just chill at home?&#10;Her: Just watched Netflix.&#10;Me: Oh cool what show did you watch? I love TV shows too.&#10;[Ghosted - No reply for 4 days]"></textarea>
+                                    <textarea id="autopsy-history-input" class="textarea-box" rows="12">Me: Hey! How's your week going?
+Her: good, super busy with work.
+Me: Oh nice what do you do again?
+Her: marketing.
+Me: That's cool! Do you like it or is it stressful?
+[No response - Ghosted for 5 days]</textarea>
                                 </div>
                                 <button class="btn-solid" id="btn-run-autopsy" onclick="runAutopsy()">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
@@ -402,36 +495,258 @@
                         <div class="surface-card">
                             <div class="surface-header">
                                 <span class="surface-title">Forensic Autopsy Report</span>
-                                <span class="status-pill" id="autopsy-status-badge">Awaiting Data</span>
+                                <span class="status-pill" id="autopsy-status-badge">Diagnosed: Stalled</span>
                             </div>
                             <div class="surface-body">
-                                <div id="autopsy-empty-state" class="empty-hero">
+                                <div id="autopsy-empty-state" class="empty-hero hidden">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                                     <h3>Identify Momentum Loss</h3>
                                     <p>Find out where the conversation died, whether it was interviewer-mode questioning or delayed scheduling, and calculate revival odds.</p>
                                 </div>
 
-                                <div id="autopsy-results" class="hidden" aria-live="polite">
+                                <div id="autopsy-results" aria-live="polite">
                                     <div class="warning-callout" style="margin-bottom: 12px;">
                                         <div class="warning-title">The Fatal Turn (Momentum Death)</div>
-                                        <div style="font-size: 12.5px; color: var(--text-primary); font-weight: 500;" id="autopsy-fatal-turn">--</div>
+                                        <div style="font-size: 12.5px; color: var(--text-primary); font-weight: 500;" id="autopsy-fatal-turn">"Oh cool what show did you watch? I love TV shows too." — Shifted into customer service interviewer mode.</div>
                                     </div>
 
                                     <div class="callout-block" style="border-left-color: var(--accent-sky);">
                                         <div class="callout-title">Root Cause Analysis</div>
-                                        <div class="callout-body" id="autopsy-root-cause" style="margin-bottom: 8px;">--</div>
+                                        <div class="callout-body" id="autopsy-root-cause" style="margin-bottom: 8px;">Loss of playful polarity. When texts feel like a LinkedIn informational interview, replies dwindle to 1-word answers until complete silence.</div>
                                         <div style="font-size: 11px; color: var(--text-muted);">Revival Odds: <strong id="autopsy-recovery-prob" style="color: var(--accent-primary); font-family: var(--font-mono);">65%</strong></div>
                                     </div>
 
                                     <div class="field-label" style="margin-bottom: 6px;">Hail Mary Revival Messages</div>
-                                    <div class="move-list-deck" id="autopsy-revival-list"></div>
+                                    <div class="move-list-deck" id="autopsy-revival-list">
+                                        <div class="move-entry-card">
+                                            <div class="move-card-top">
+                                                <span class="move-tag">Playful Disconnect</span>
+                                                <button class="btn-copy" onclick="copyToClipboard('Did you get lost in an Ikea or did you just decide our friendship wasn\'t meant to be? 😂', this)">
+                                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                                                    <span>Copy</span>
+                                                </button>
+                                            </div>
+                                            <div class="move-quote-row">
+                                                <span class="move-quote-text">"Did you get lost in an Ikea or did you just decide our friendship wasn't meant to be? 😂"</span>
+                                            </div>
+                                            <div class="move-reason">Disarms the awkwardness of ghosting with low-pressure humor without sounding butthurt.</div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- TAB 5: Dispatch & Automation -->
+                <!-- TAB 5: Phone & Mobile Wingman Hub -->
+                <div class="tab-content" id="tab-phone" role="tabpanel">
+                    <div style="display: flex; flex-direction: column; gap: 20px;">
+                        <!-- Overview Banner -->
+                        <div class="callout-block" style="border-left-color: var(--accent-primary); background: rgba(59, 130, 246, 0.05); padding: 14px 18px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                                <div>
+                                    <div style="font-weight: 700; font-size: 13.5px; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="2.5"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+                                        <span>Direct Phone Integration: iMessage, Tinder DMs, Instagram & Telegram</span>
+                                    </div>
+                                    <div style="font-size: 12px; color: var(--text-muted); margin-top: 3px;">
+                                        Real text game happens on phones. Connect RizzCoach directly so you or anyone else can decode texts and get top tactical replies in under 1 second right from their phone.
+                                    </div>
+                                </div>
+                                <div style="display: flex; gap: 8px;">
+                                    <button class="btn-solid" onclick="testPhoneFlow()">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                                        <span>Test Mobile Flow</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 4 Connectors Channel Grid -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px;">
+                            <!-- Channel 1: Telegram Bot -->
+                            <div class="surface-card">
+                                <div class="surface-header">
+                                    <span class="surface-title" style="display: flex; align-items: center; gap: 6px;">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--accent-sky)" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                                        <span>Telegram Pocket Wingman</span>
+                                    </span>
+                                    <span class="status-pill" style="color: var(--accent-emerald); background: rgba(16, 185, 129, 0.1);">MULTI-USER</span>
+                                </div>
+                                <div class="surface-body" style="font-size: 12px; gap: 10px;">
+                                    <p style="color: var(--text-muted); line-height: 1.45;">Zero-install wingman for <strong>any person's phone</strong> (iPhone or Android). Forward any text or screenshot to get instant subtext + 3 tap-to-copy moves.</p>
+                                    <div style="background: var(--bg-primary); padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); font-family: var(--font-mono); font-size: 11px;">
+                                        Bot: <strong>@RizzCoachBot</strong> &bull; Mode: 24/7 Polling
+                                    </div>
+                                    <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                                        <button class="btn-subtle" onclick="copyToClipboard('https://t.me/RizzCoachBot', this)">Copy Bot Link</button>
+                                        <button class="btn-ghost" onclick="sendTestTelegramCard()">Test Sample Card</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Channel 2: iOS Action Button / Shortcuts -->
+                            <div class="surface-card">
+                                <div class="surface-header">
+                                    <span class="surface-title" style="display: flex; align-items: center; gap: 6px;">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="2"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><circle cx="12" cy="14" r="1"/></svg>
+                                        <span>iPhone 1-Tap Action Button</span>
+                                    </span>
+                                    <span class="status-pill">iOS SHORTCUT</span>
+                                </div>
+                                <div class="surface-body" style="font-size: 12px; gap: 10px;">
+                                    <p style="color: var(--text-muted); line-height: 1.45;">Highlight text anywhere in Tinder/Instagram/Messages &rarr; Tap Action Button &rarr; Top move copied directly to your clipboard in 0.5s.</p>
+                                    <div style="background: var(--bg-primary); padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); font-family: var(--font-mono); font-size: 11px; word-break: break-all;">
+                                        Endpoint: <code>/api/mobile/quick-coach</code>
+                                    </div>
+                                    <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                                        <button class="btn-subtle" onclick="copyShortcutUrl(this)">Copy Endpoint URL</button>
+                                        <button class="btn-ghost" onclick="showShortcutGuide()">View Setup Guide</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Channel 3: Apple iMessage Native -->
+                            <div class="surface-card">
+                                <div class="surface-header">
+                                    <span class="surface-title" style="display: flex; align-items: center; gap: 6px;">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--accent-emerald)" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                                        <span>Apple iMessage (macOS)</span>
+                                    </span>
+                                    <span class="status-pill">NATIVE MAC</span>
+                                </div>
+                                <div class="surface-body" style="font-size: 12px; gap: 10px;">
+                                    <p style="color: var(--text-muted); line-height: 1.45;">Direct connection to macOS Messages app. Reads live conversation history from <code>chat.db</code> and dispatches replies via AppleScript.</p>
+                                    <div id="imessage-status-badge" style="background: var(--bg-primary); padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); font-size: 11px;">
+                                        Status: <strong>Ready (AppleScript Bridge Active)</strong>
+                                    </div>
+                                    <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                                        <button class="btn-subtle" onclick="loadRecentIMessages()">Fetch Recent Threads</button>
+                                        <button class="btn-ghost" onclick="sendTacticalIMessagePrompt()">Send Reply</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Channel 4: Tinder & Instagram DMs -->
+                            <div class="surface-card">
+                                <div class="surface-header">
+                                    <span class="surface-title" style="display: flex; align-items: center; gap: 6px;">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--accent-rose)" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+                                        <span>Tinder & Instagram DMs</span>
+                                    </span>
+                                    <span class="status-pill">CONNECTOR</span>
+                                </div>
+                                <div class="surface-body" style="font-size: 12px; gap: 10px;">
+                                    <p style="color: var(--text-muted); line-height: 1.45;">Syncs new matches, detects bio context, generates personalized openers, and queues them for 1-tap phone approval with pacing jitter.</p>
+                                    <div style="background: var(--bg-primary); padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); font-size: 11px;">
+                                        Guardrail: <strong>15 Openers / Day Max (Anti-Ban)</strong>
+                                    </div>
+                                    <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                                        <button class="btn-subtle" onclick="syncOutreach('tinder')">Sync Tinder</button>
+                                        <button class="btn-ghost" onclick="syncOutreach('instagram')">Sync Instagram</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Live Interactive Mobile Simulator Workspace -->
+                        <div class="workspace-grid" style="height: auto;">
+                            <!-- Left: Mobile Input Simulator -->
+                            <div class="surface-card">
+                                <div class="surface-header">
+                                    <span class="surface-title">Incoming Phone Message Simulator</span>
+                                    <span class="status-pill" id="sim-channel-badge">iMessage</span>
+                                </div>
+                                <div class="surface-body">
+                                    <div style="display: flex; gap: 10px;">
+                                        <div class="field-group" style="flex: 1;">
+                                            <label class="field-label" for="phone-target-name">Match / Contact</label>
+                                            <input type="text" id="phone-target-name" class="input-box" value="Sophie">
+                                        </div>
+                                        <div class="field-group" style="flex: 1;">
+                                            <label class="field-label" for="phone-channel-select">Channel</label>
+                                            <select id="phone-channel-select" class="input-box" onchange="updateSimChannelBadge(this.value)">
+                                                <option value="imessage">Apple iMessage</option>
+                                                <option value="tinder">Tinder DM</option>
+                                                <option value="instagram">Instagram DM</option>
+                                                <option value="sms">SMS Text</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="field-group">
+                                        <label class="field-label" for="phone-sim-text">Her Inbound Message</label>
+                                        <textarea id="phone-sim-text" class="input-box" rows="3">haha maybe, depends on if you're trouble</textarea>
+                                    </div>
+
+                                    <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 6px;">
+                                        <button class="btn-subtle" onclick="setPhoneSample('trouble')">"Depends on if you're trouble"</button>
+                                        <button class="btn-subtle" onclick="setPhoneSample('tonight')">"What are you up to tonight?"</button>
+                                        <button class="btn-subtle" onclick="setPhoneSample('dry')">"nm u"</button>
+                                        <button class="btn-subtle" onclick="setPhoneSample('number')">"Text my number 310-555-0199"</button>
+                                    </div>
+
+                                    <button class="btn-solid" id="btn-phone-run" onclick="testPhoneFlow()">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                                        <span>Trigger Mobile Wingman Flow</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Right: Live iPhone Mobile HUD & Output -->
+                            <div class="surface-card">
+                                <div class="surface-header">
+                                    <span class="surface-title">Live Mobile HUD (Phone Screen Preview)</span>
+                                    <span class="status-pill" style="color: var(--accent-emerald);" id="hud-status-badge">AUTO-COPIED</span>
+                                </div>
+                                <div class="surface-body" style="gap: 14px;">
+                                    <!-- Dynamic Island / Notification Banner HUD -->
+                                    <div style="background: #09090b; border: 1px solid #27272a; border-radius: 16px; padding: 14px 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.5);">
+                                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                                            <div style="display: flex; align-items: center; gap: 6px;">
+                                                <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--accent-emerald);"></div>
+                                                <span style="font-size: 11px; font-weight: 700; color: #a1a1aa; text-transform: uppercase; letter-spacing: 0.05em;">RizzCoach Dynamic HUD</span>
+                                            </div>
+                                            <span style="font-size: 11px; color: var(--accent-primary); font-family: var(--font-mono);" id="hud-interest-tag">88% Interest</span>
+                                        </div>
+                                        <div style="font-size: 14px; font-weight: 600; color: #ffffff; margin-bottom: 6px;" id="hud-best-move">
+                                            "Only if you count ordering excessive dessert as trouble."
+                                        </div>
+                                        <div style="font-size: 11.5px; color: #71717a;" id="hud-subtext">
+                                            🧐 <em>Subtext:</em> Playful qualification test. She is testing if you have backbone or if you crumble into eager agreement.
+                                        </div>
+                                    </div>
+
+                                    <!-- Clipboard Status Banner -->
+                                    <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: var(--radius-sm); padding: 8px 12px;">
+                                        <div style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--accent-emerald-text); font-weight: 500;">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                                            <span>#1 Tactical Move copied to your phone clipboard</span>
+                                        </div>
+                                        <button class="btn-copy" onclick="copySimMove(this)">
+                                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                                            <span>Copy</span>
+                                        </button>
+                                    </div>
+
+                                    <!-- Direct Actions -->
+                                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                        <button class="btn-subtle" onclick="dispatchSimToIMessage()">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                                            <span>Dispatch via iMessage</span>
+                                        </button>
+                                        <button class="btn-ghost" onclick="sendSimToTelegram()">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                                            <span>Push Card to Telegram</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 6: Dispatch & Automation -->
                 <div class="tab-content" id="tab-automation" role="tabpanel">
                     <div style="display: flex; flex-direction: column; gap: 20px;">
                         <div class="workspace-grid" style="height: auto;">

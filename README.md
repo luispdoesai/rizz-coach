@@ -134,21 +134,59 @@ RizzCoach doesn't use sleazy pickup artist tricks. Every engine strictly enforce
 
 ---
 
-## 📱 Use It on Your Phone (Telegram Pocket Wingman)
-
-You don't have to sit at your computer while texting. You can have RizzCoach directly on your phone lock screen via Telegram:
-
-1. Open Telegram and search for `@BotFather`. Type `/newbot` to get your free bot token.
-2. Put your token and Telegram Chat ID in [`.env`](file:///Users/luispadilla/Desktop/rizz-coach/.env):
-   ```bash
-   TELEGRAM_BOT_TOKEN=123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ
-   TELEGRAM_CHAT_ID=your_chat_id_here
-   ```
-3. **What happens next:**
-   * Forward any screenshot or text to your bot: it sends back the subtext breakdown and 3 copy-paste moves in under 2 seconds.
-   * When Tinder or Instagram finds a new match, your bot pings you with **`[✅ Approve & Schedule]`**, **`[⚡ Send Now]`**, and **`[❌ Skip]`** buttons right on your lock screen!
-
 ---
+
+## 📱 The Phone-First Wingman: For You & Other People's Phones
+
+> **"Dating happens on phones, not laptops."**  
+> Nobody opens a desktop browser while sitting at a bar or swiping in bed. RizzCoach connects directly to phones so **you or anyone else** can get subtext decoding and top tactical moves without ever touching a web UI.
+
+### 1. ✈️ Telegram Pocket Wingman (Multi-User, Zero-Install)
+*The easiest way for ANYONE on iPhone or Android to use RizzCoach:*
+* **Zero app install needed**: Works on standard Telegram.
+* **Multi-tenant & private**: Every person has their own isolated session based on their Telegram account.
+* **How people use it**:
+  1. Forward or type any text from Tinder, Hinge, Instagram, or iMessage to `@RizzCoachBot`.
+  2. The bot instantly decodes her emotional subtext, checks for cringe/over-investment, and returns **3 tap-to-copy tactical replies** directly to their phone screen.
+  3. Commands on the go:
+     * `/score <draft>` — Test what you're about to send before sending it.
+     * `/sync` — Scan Tinder or Instagram for new matches and get 1-tap approval buttons.
+     * `/pending` — Review queue with `[✅ Approve & Schedule]`, `[⚡ Send Now]`, and `[❌ Skip]`.
+     * `/imessage` — Inspect recent iMessage threads and dispatch replies.
+
+### 2. ⚡ iPhone 1-Tap Action Button & iOS Shortcuts (Instant Clipboard Copy)
+*For iPhone users who want instantaneous replies while inside Tinder, Instagram, or Messages:*
+* **How it works**:
+  1. Highlight or copy any text message from a match.
+  2. Press the **iPhone Action Button** (iPhone 15/16 Pro), double-tap the back of the phone (**Back Tap**), or tap **Share Sheet &rarr; RizzCoach**.
+  3. RizzCoach hits `/api/mobile/quick-coach`, calculates the best tactical response, and **copies it directly to your iPhone clipboard** while displaying an iOS notification banner HUD.
+  4. Double-tap and paste into your chat! Total time: **0.8 seconds**.
+* **Quick Setup for Any iPhone User**:
+  1. In the Apple **Shortcuts** app, create a shortcut named `RizzCoach`.
+  2. Add Action: `Get Clipboard`.
+  3. Add Action: `Get Contents of URL` &rarr; `POST` to `http://<your-host>:8000/api/mobile/quick-coach` with JSON `{ "text": Clipboard }`.
+  4. Add Action: `Get Dictionary Value` &rarr; Key `clipboard_text`.
+  5. Add Action: `Copy to Clipboard`.
+  6. Add Action: `Show Notification` &rarr; Text: `result['ios_hud']`.
+
+### 3. 💬 Apple iMessage Native Connector (macOS Bridge)
+*Direct integration with Apple Messages:*
+* Reads live conversation threads directly from `~/Library/Messages/chat.db`.
+* Dispatches messages seamlessly via AppleScript (`osascript`) with smart mock fallback for cross-platform testing.
+* Endpoint: `POST /api/mobile/imessage/send` and `POST /api/mobile/imessage/tactical-reply`.
+
+### 4. 🌐 Sharing With Other People's Phones (Zero-Config Hosting)
+Want to give friends or other people access to RizzCoach from their phones?
+* **Local Network (Wi-Fi)**: Have them connect to `http://<your-mac-ip>:8000`.
+* **Instant Free HTTPS Public URL**: Run a quick tunnel:
+  ```bash
+  # Using Cloudflare (No account or port-forwarding needed)
+  npx cloudflared tunnel --url http://localhost:8000
+  ```
+  Share the generated `https://xyz.trycloudflare.com` URL. Anyone on earth can now use the mobile web app or configure their iOS Shortcut to point to it!
+* **Cloud Deploy (1-Click)**:
+  RizzCoach includes a production `Dockerfile` and `docker-compose.yml`. Deploy to Fly.io or Render with `fly launch` in 60 seconds.
+
 
 ## 🔒 Privacy & BYOK (Bring Your Own Key)
 

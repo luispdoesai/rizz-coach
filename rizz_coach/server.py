@@ -17,6 +17,7 @@ from rizz_coach.storage.db import db
 from rizz_coach.adapters.sms_twilio import twilio_adapter
 from rizz_coach.adapters.telegram_bot import telegram_bot
 from rizz_coach.connectors import outreach_manager, tinder_connector, instagram_connector
+from rizz_coach.connectors.imessage import imessage_connector
 
 app = FastAPI(
     title="RizzCoach",
@@ -94,6 +95,20 @@ class OutreachApproveRequest(BaseModel):
 
 class OutreachRejectRequest(BaseModel):
     item_id: str
+
+class QuickCoachRequest(BaseModel):
+    text: str
+    target_name: Optional[str] = "Match"
+    channel: Optional[str] = "mobile"
+
+class IMessageSendRequest(BaseModel):
+    recipient: str
+    text: str
+
+class IMessageReplyRequest(BaseModel):
+    recipient: str
+    context_text: Optional[str] = None
+    auto_send: Optional[bool] = False
 
 
 # ----------------- Core Coach Endpoints -----------------
@@ -176,51 +191,91 @@ async def api_outreach_reject(req: OutreachRejectRequest):
     """Rejects or skips a queued outreach message."""
     return await outreach_manager.reject_outreach(req.item_id)
 
+# ----------------- Mobile & Phone First Endpoints -----------------
+@app.post("/api/mobile/quick-coach")
+async def api_mobile_quick_coach(req: QuickCoachRequest):
+    """
+    High-speed mobile endpoint designed for iPhone Action Button, iOS Shortcuts,
+    and Share Sheet. Returns the top tactical move formatted for instant clipboard copying.
+    """
+    report = await analyzer.analyze(req.text, req.target_name)
+    best_move = report.tactical_moves[0].text if report.tactical_moves else "Haha fair enough, you got me."
+    
+    # Format iOS notification banner HUD string
+    ios_hud = f"🎯 Best Move: \"{best_move}\"\n🧐 Subtext: {report.subtext_translation} ({report.interest_score}% interest)"
+    
+    return {
+        "status": "success",
+        "best_move": best_move,
+        "subtext": report.subtext_translation,
+        "interest_score": report.interest_score,
+        "interest_level": report.interest_level,
+        "moves": [m.model_dump() if hasattr(m, "model_dump") else m.dict() for m in report.tactical_moves],
+        "cringe_warnings": report.cringe_warnings,
+        "ios_hud": ios_hud,
+        "clipboard_text": best_move
+    }
+
+@app.get("/api/mobile/shortcut/guide")
+async def api_mobile_shortcut_guide():
+    """Returns iOS Shortcuts / Action Button setup guide for 1-tap iPhone usage."""
+    return {
+        "name": "RizzCoach Wingman Action",
+        "trigger": "iPhone 15/16 Action Button, Back Tap, or Share Sheet",
+        "method": "POST",
+        "endpoint": "/api/mobile/quick-coach",
+        "setup_steps": [
+            "1. Open the Apple 'Shortcuts' app on your iPhone.",
+            "2. Create a new shortcut named 'RizzCoach'.",
+            "3. Add Action: 'Get Clipboard' (or Shortcut Input from Share Sheet).",
+            "4. Add Action: 'Get Contents of URL' -> Method: POST, URL: http://<mac-ip>:8000/api/mobile/quick-coach, Request Body: JSON with key 'text' = Clipboard.",
+            "5. Add Action: 'Get Dictionary Value' -> key 'clipboard_text'.",
+            "6. Add Action: 'Copy to Clipboard' (sets top tactical reply ready to paste).",
+            "7. Add Action: 'Show Notification' -> Text: result['ios_hud']."
+        ]
+    }
+
+@app.get("/api/mobile/imessage/recent")
+async def api_mobile_imessage_recent():
+    """Returns recent incoming iMessage threads on the host Mac."""
+    matches = await imessage_connector.fetch_new_matches()
+    return {"threads": matches, "is_macos": imessage_connector.is_macos}
+
+@app.post("/api/mobile/imessage/send")
+async def api_mobile_imessage_send(req: IMessageSendRequest):
+    """Sends an iMessage through AppleScript on the host Mac."""
+    success = await imessage_connector.send_message(req.recipient, req.text)
+    return {"status": "sent" if success else "failed", "recipient": req.recipient, "text": req.text}
+
+@app.post("/api/mobile/imessage/tactical-reply")
+async def api_mobile_imessage_tactical_reply(req: IMessageReplyRequest):
+    """Reads conversation context, generates the best tactical move, and optionally dispatches it."""
+    chat_context = req.context_text
+    if not chat_context:
+        chat_context = await imessage_connector.fetch_chat_history(req.recipient)
+    report = await analyzer.analyze(chat_context, req.recipient)
+    best_move = report.tactical_moves[0].text if report.tactical_moves else "Haha fair enough."
+    
+    dispatched = False
+    if req.auto_send:
+        dispatched = await imessage_connector.send_message(req.recipient, best_move)
+        
+    return {
+        "recipient": req.recipient,
+        "best_move": best_move,
+        "subtext": report.subtext_translation,
+        "moves": [m.model_dump() if hasattr(m, "model_dump") else m.dict() for m in report.tactical_moves],
+        "dispatched": dispatched
+    }
+
 # ----------------- Webhooks -----------------
 @app.post("/webhooks/telegram")
 async def telegram_webhook(req: Dict[str, Any], background_tasks: BackgroundTasks):
     """
-    Telegram Webhook handler.
-    1. Interactive Inline Button Clicks: Approve, Send Now, or Skip.
-    2. Forwarded Messages / Screenshots: Returns instant Wingman analysis card.
+    Unified Telegram Webhook handler for inline approvals, coaching queries, and match syncs.
     """
-    # 1. Inline button callback query
-    if "callback_query" in req:
-        cb = req["callback_query"]
-        cb_id = cb.get("id")
-        data = cb.get("data", "")
-        chat_id = str(cb.get("message", {}).get("chat", {}).get("id", ""))
+    return await telegram_bot.handle_update(req)
 
-        parts = data.split(":", 1)
-        action = parts[0]
-        item_id = parts[1] if len(parts) > 1 else ""
-
-        if action == "approve":
-            background_tasks.add_task(outreach_manager.approve_and_dispatch, item_id, False)
-            await telegram_bot.answer_callback_query(cb_id, "✅ Approved! Scheduled with human pacing delay.")
-            await telegram_bot.send_message(chat_id, "✅ *Approved!* Message queued and scheduled with human jitter delay.")
-        elif action == "send_now":
-            background_tasks.add_task(outreach_manager.approve_and_dispatch, item_id, True)
-            await telegram_bot.answer_callback_query(cb_id, "⚡ Dispatched immediately!")
-            await telegram_bot.send_message(chat_id, "⚡ *Dispatched!* Message sent immediately to match.")
-        elif action == "reject":
-            background_tasks.add_task(outreach_manager.reject_outreach, item_id)
-            await telegram_bot.answer_callback_query(cb_id, "❌ Match outreach skipped.")
-            await telegram_bot.send_message(chat_id, "❌ *Skipped.* Match outreach removed from queue.")
-        return {"status": "callback_processed"}
-
-    # 2. Regular message received for analysis
-    if "message" in req:
-        msg = req["message"]
-        chat_id = str(msg.get("chat", {}).get("id", ""))
-        text = msg.get("text", "")
-        if text:
-            report = await analyzer.analyze(text)
-            card = telegram_bot.format_coaching_card(report)
-            await telegram_bot.send_message(chat_id, card)
-        return {"status": "message_analyzed"}
-
-    return {"status": "ignored"}
 
 @app.post("/webhooks/twilio")
 async def twilio_webhook(request: Request, background_tasks: BackgroundTasks):

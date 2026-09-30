@@ -69,3 +69,8 @@ Pre-detected heuristic flags: {quick_flags}
             why_it_scored=data.get("why_it_scored", "Decent message but could have more punch."),
             suggested_rewrite=data.get("suggested_rewrite")
         )
+
+    async def score_draft(self, draft_message: str, context_message: str = "") -> RizzScorecard:
+        """Alias for score_message to support mobile/bot adapters."""
+        return await self.score_message(draft_message=draft_message, context_message=context_message)
+

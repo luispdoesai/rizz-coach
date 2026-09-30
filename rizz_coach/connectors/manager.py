@@ -8,6 +8,7 @@ from rizz_coach.core.automation import automation_engine
 from rizz_coach.adapters.telegram_bot import telegram_bot
 from rizz_coach.connectors.tinder import tinder_connector
 from rizz_coach.connectors.instagram import instagram_connector
+from rizz_coach.connectors.imessage import imessage_connector
 
 class OutreachManager:
     """
@@ -18,7 +19,8 @@ class OutreachManager:
     def __init__(self):
         self.connectors = {
             "tinder": tinder_connector,
-            "instagram": instagram_connector
+            "instagram": instagram_connector,
+            "imessage": imessage_connector
         }
         self.analyzer = ConversationAnalyzer()
 
